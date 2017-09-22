@@ -1,4 +1,4 @@
-package br.ufsc.lisa.DINo.utils;
+package br.ufsc.lisa.DINo;
 
 public interface Connector {
 	public void connect (String uri);
