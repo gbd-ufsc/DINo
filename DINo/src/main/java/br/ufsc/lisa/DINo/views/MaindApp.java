@@ -11,6 +11,9 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.JLabel;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class MaindApp {
 
@@ -66,5 +69,14 @@ public class MaindApp {
 		JLabel lblTabelas = new JLabel("Tabelas");
 		lblTabelas.setBounds(85, 214, 70, 15);
 		panel.add(lblTabelas);
+		
+		JButton btnButaum = new JButton("butaum");
+		btnButaum.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		btnButaum.setBounds(176, 92, 117, 25);
+		panel.add(btnButaum);
 	}
 }
