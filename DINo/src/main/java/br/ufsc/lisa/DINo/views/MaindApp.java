@@ -65,9 +65,7 @@ public class MaindApp {
 		panelMain.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentShown(ComponentEvent arg0) {
-				comboBox.addItem("Tabela 1");
-				comboBox.addItem("Tabela 2");
-				comboBox.addItem("Tabela 3");
+				
 			}
 		});
 		frame.getContentPane().add(panelMain, BorderLayout.CENTER);
