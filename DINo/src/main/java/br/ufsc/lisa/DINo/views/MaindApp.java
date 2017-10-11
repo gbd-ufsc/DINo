@@ -19,6 +19,11 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JTextArea;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
+import java.awt.SystemColor;
+import java.awt.Color;
 
 public class MaindApp {
 
@@ -27,6 +32,7 @@ public class MaindApp {
 	private JTextField textFieldPort;
 	private JTextField textFieldUsername;
 	private JTextField textFieldPassword;
+	private JTextField textField;
 
 	/**
 	 * Launch the application.
@@ -124,6 +130,11 @@ public class MaindApp {
 		textFieldPassword.setColumns(10);
 		
 		JButton btnTest = new JButton("Test");
+		btnTest.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//chama um metodo no controlador que executa os testes, os textFields serao passados como parametro do método. 
+			}
+		});
 		btnTest.setBounds(12, 166, 117, 25);
 		panelServer.add(btnTest);
 		
@@ -149,6 +160,25 @@ public class MaindApp {
 		
 		JPanel panelTables = new JPanel();
 		tabbedPaneSource.addTab("Tables", null, panelTables, null);
+		panelTables.setLayout(null);
+		
+		JLabel lblTables_1 = new JLabel("Tables");
+		lblTables_1.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblTables_1.setBounds(92, 12, 70, 15);
+		panelTables.add(lblTables_1);
+		
+		JList listTable = new JList();
+		listTable.setBounds(12, 22, 243, 73);
+		panelTables.add(listTable);
+		
+		JLabel lblColumn = new JLabel("Column");
+		lblColumn.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblColumn.setBounds(92, 96, 70, 15);
+		panelTables.add(lblColumn);
+		
+		JList listColumn = new JList();
+		listColumn.setBounds(12, 114, 243, 81);
+		panelTables.add(listColumn);
 		
 		JLabel lblTables = new JLabel("Target");
 		lblTables.setFont(new Font("Dialog", Font.BOLD, 14));
@@ -161,5 +191,42 @@ public class MaindApp {
 		
 		JPanel panelCollection = new JPanel();
 		tabbedPaneTarget.addTab("Collection", null, panelCollection, null);
+		panelCollection.setLayout(null);
+		
+		JLabel lblProperties = new JLabel("Properties");
+		lblProperties.setFont(new Font("Dialog", Font.BOLD, 13));
+		lblProperties.setBounds(92, 12, 94, 24);
+		panelCollection.add(lblProperties);
+		
+		JList listProperties = new JList();
+		listProperties.setBounds(45, 40, 173, 137);
+		panelCollection.add(listProperties);
+		
+		JPanel panel = new JPanel();
+		panel.setBounds(12, 303, 388, 128);
+		panelPrincipal.add(panel);
+		panel.setLayout(null);
+		
+		JLabel lblExecute = new JLabel("Execute");
+		lblExecute.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblExecute.setBounds(12, 12, 70, 15);
+		panel.add(lblExecute);
+		
+		JLabel lblStatus = new JLabel("Status:");
+		lblStatus.setBounds(12, 56, 70, 15);
+		panel.add(lblStatus);
+		
+		textField = new JTextField();
+		textField.setBounds(12, 83, 255, 33);
+		panel.add(textField);
+		textField.setColumns(10);
+		
+		JButton btnImport = new JButton("Import");
+		btnImport.setBounds(279, 83, 97, 33);
+		panel.add(btnImport);
+		
+		JButton btnCancel = new JButton("Cancel");
+		btnCancel.setBounds(472, 386, 117, 34);
+		panelPrincipal.add(btnCancel);
 	}
 }
