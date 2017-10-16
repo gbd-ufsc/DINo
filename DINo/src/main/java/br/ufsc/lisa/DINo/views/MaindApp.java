@@ -1,7 +1,6 @@
 package br.ufsc.lisa.DINo.views;
 
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
@@ -10,10 +9,14 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.sql.SQLException;
+
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.BoxLayout;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
@@ -24,6 +27,11 @@ import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import java.awt.SystemColor;
 import java.awt.Color;
+import br.ufsc.lisa.DINo.util.PostgresDB;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class MaindApp {
 
@@ -33,6 +41,7 @@ public class MaindApp {
 	private JTextField textFieldUsername;
 	private JTextField textFieldPassword;
 	private JTextField textField;
+	private PostgresDB postgresDb;
 
 	/**
 	 * Launch the application.
@@ -50,39 +59,36 @@ public class MaindApp {
 		});
 	}
 
-	/**
-	 * Create the application.
-	 */
-	public MaindApp() {
+	
+	public MaindApp() throws ClassNotFoundException, SQLException {
 		initialize();
+		postgresDb = new PostgresDB();
 	}
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
+	
+	private void initialize() throws ClassNotFoundException, SQLException {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 607, 475);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		JPanel panelPrincipal = new JPanel();
-		panelPrincipal.addComponentListener(new ComponentAdapter() {
+		JPanel mainPanel = new JPanel();
+		mainPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentShown(ComponentEvent arg0) {
 				
 			}
 		});
-		frame.getContentPane().add(panelPrincipal, BorderLayout.CENTER);
-		panelPrincipal.setLayout(null);
+		frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
+		mainPanel.setLayout(null);
 		
 		JLabel lblSource = new JLabel("Source");
 		lblSource.setFont(new Font("Dialog", Font.BOLD, 14));
 		lblSource.setBounds(96, 12, 78, 27);
-		panelPrincipal.add(lblSource);
+		mainPanel.add(lblSource);
 		
 		JTabbedPane tabbedPaneSource = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPaneSource.setBounds(12, 41, 272, 234);
-		panelPrincipal.add(tabbedPaneSource);
+		mainPanel.add(tabbedPaneSource);
 		
 		JPanel panelServer = new JPanel();
 		tabbedPaneSource.addTab("Server", null, panelServer, null);
@@ -132,7 +138,7 @@ public class MaindApp {
 		JButton btnTest = new JButton("Test");
 		btnTest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//chama um metodo no controlador que executa os testes, os textFields serao passados como parametro do método. 
+				postgresDb.connect(textFieldHost.getText(), textFieldPort.getText(), textFieldUsername.getText(), textFieldPassword.getText());
 			}
 		});
 		btnTest.setBounds(12, 166, 117, 25);
@@ -146,7 +152,7 @@ public class MaindApp {
 		tabbedPaneSource.addTab("Database", null, panelDatabase, null);
 		panelDatabase.setLayout(null);
 		
-		JList list = new JList();
+		JList list = new JList();		
 		list.setBounds(40, 12, 173, 141);
 		panelDatabase.add(list);
 		
@@ -183,11 +189,11 @@ public class MaindApp {
 		JLabel lblTables = new JLabel("Target");
 		lblTables.setFont(new Font("Dialog", Font.BOLD, 14));
 		lblTables.setBounds(419, 18, 78, 21);
-		panelPrincipal.add(lblTables);
+		mainPanel.add(lblTables);
 		
 		JTabbedPane tabbedPaneTarget = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPaneTarget.setBounds(317, 41, 272, 234);
-		panelPrincipal.add(tabbedPaneTarget);
+		mainPanel.add(tabbedPaneTarget);
 		
 		JPanel panelCollection = new JPanel();
 		tabbedPaneTarget.addTab("Collection", null, panelCollection, null);
@@ -202,31 +208,36 @@ public class MaindApp {
 		listProperties.setBounds(45, 40, 173, 137);
 		panelCollection.add(listProperties);
 		
-		JPanel panel = new JPanel();
-		panel.setBounds(12, 303, 388, 128);
-		panelPrincipal.add(panel);
-		panel.setLayout(null);
+		JPanel panelExecute = new JPanel();
+		panelExecute.setBounds(12, 303, 388, 128);
+		mainPanel.add(panelExecute);
+		panelExecute.setLayout(null);
 		
 		JLabel lblExecute = new JLabel("Execute");
 		lblExecute.setFont(new Font("Dialog", Font.BOLD, 14));
 		lblExecute.setBounds(12, 12, 70, 15);
-		panel.add(lblExecute);
+		panelExecute.add(lblExecute);
 		
 		JLabel lblStatus = new JLabel("Status:");
 		lblStatus.setBounds(12, 56, 70, 15);
-		panel.add(lblStatus);
+		panelExecute.add(lblStatus);
 		
 		textField = new JTextField();
 		textField.setBounds(12, 83, 255, 33);
-		panel.add(textField);
+		panelExecute.add(textField);
 		textField.setColumns(10);
 		
 		JButton btnImport = new JButton("Import");
 		btnImport.setBounds(279, 83, 97, 33);
-		panel.add(btnImport);
+		panelExecute.add(btnImport);
 		
 		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
 		btnCancel.setBounds(472, 386, 117, 34);
-		panelPrincipal.add(btnCancel);
+		mainPanel.add(btnCancel);
 	}
 }

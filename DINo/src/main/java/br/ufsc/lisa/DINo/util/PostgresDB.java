@@ -8,26 +8,33 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+
 import com.mongodb.Cursor;
 
 public class PostgresDB implements RelationalDB {
 
 	private String driver = "org.postgresql.Driver";
 	private Connection con = null;
+	private String url;
+	private String port;
+	private String user;
+	private String password; 
 
 	public Cursor read(String table, String keyColumns) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
-	public boolean connect(String uri, String porta, String user, String password) {
-
-		// String user = "postgres";
-		// String senha = "minhasenha";
-		// String url = "jdbc:postgresql://localhost:5432/Databases";
+	public boolean connect(String host, String porta, String user, String password) {
+		this.url = "jdbc:postgresql://"+host+":"+porta+"/poi_uruguay";
+		 
+//		 uri = "jdbc:postgresql://localhost:5432/poi_uruguay";
 		try {
 			Class.forName(driver);
-			con = (Connection) DriverManager.getConnection(uri, user, password);
+			con = (Connection) DriverManager.getConnection(url, user, password);
+			System.out.println("Conexão realizada com sucesso.");
 
 			return true;
 		} catch (ClassNotFoundException ex) {
@@ -39,25 +46,17 @@ public class PostgresDB implements RelationalDB {
 		}		
 	}
 	
-	public List<?> listarDatabases() throws ClassNotFoundException, SQLException  {
+	public DefaultListModel<String> listarDatabases() throws ClassNotFoundException, SQLException  {
 
-        List listaDatabase = new ArrayList<String>();
+        DefaultListModel<String> listaDatabase = new DefaultListModel();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ");
-        sql.append("datname as nm_database ");
-        sql.append("FROM ");
-        sql.append("pg_database ");
-        sql.append("WHERE ");
-        sql.append("datistemplate = false ");
-        sql.append("AND ");
-        sql.append("datname != 'postgres' ");
-        sql.append("ORDER BY nm_database");
-
+        sql.append("SELECT * FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') ORDER BY schemaname, tablename;");
+        		
         PreparedStatement pstmt = con.prepareStatement(sql.toString());
         ResultSet rs = pstmt.executeQuery();
         while (rs.next()) {
-            listaDatabase.add(rs.getString("nm_database"));
+            listaDatabase.addElement(rs.getString("Banco poi_uruguay "));
         }
         return listaDatabase;
         
