@@ -2,7 +2,7 @@ package br.ufsc.lisa.DINo.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,6 +21,14 @@ public class PostgresDB implements RelationalDB {
 	private String port;
 	private String user;
 	private String password; 
+	
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
 	public Cursor read(String table, String keyColumns) {
 		
@@ -28,7 +36,7 @@ public class PostgresDB implements RelationalDB {
 	}
 
 	public boolean connect(String host, String porta, String user, String password) {
-		this.url = "jdbc:postgresql://"+host+":"+porta+"/poi_uruguay";
+		this.url = "jdbc:postgresql://"+host+":"+porta+"/?";
 		 
 //		 uri = "jdbc:postgresql://localhost:5432/poi_uruguay";
 		try {
@@ -46,19 +54,37 @@ public class PostgresDB implements RelationalDB {
 		}		
 	}
 	
-	public DefaultListModel<String> listarDatabases() throws ClassNotFoundException, SQLException  {
+	public DefaultListModel<String> listDatabases() throws ClassNotFoundException, SQLException  {
 
-        DefaultListModel<String> listaDatabase = new DefaultListModel();
+        DefaultListModel<String> listDatabase = new DefaultListModel();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT * FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') ORDER BY schemaname, tablename;");
-        		
-        PreparedStatement pstmt = con.prepareStatement(sql.toString());
-        ResultSet rs = pstmt.executeQuery();
-        while (rs.next()) {
-            listaDatabase.addElement(rs.getString("Banco poi_uruguay "));
-        }
-        return listaDatabase;
+        sql.append("SELECT datname from pg_database where datistemplate = false");
         
+        Statement pstmt = con.createStatement();
+        
+        ResultSet rs = pstmt.executeQuery(sql.toString());
+        
+        while (rs.next()) {
+            listDatabase.addElement(rs.getString("datname"));
+        }
+        return listDatabase;        
+    }
+	
+	public DefaultListModel<String> listTables() throws ClassNotFoundException, SQLException  {
+
+        DefaultListModel<String> listTables = new DefaultListModel();
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("select tablename FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') ORDER BY tablename;");
+        
+        Statement pstmt = con.createStatement();
+        
+        ResultSet rs = pstmt.executeQuery(sql.toString());
+        
+        while (rs.next()) {
+            listTables.addElement(rs.getString("tablename"));
+        }
+        return listTables;        
     }
 }

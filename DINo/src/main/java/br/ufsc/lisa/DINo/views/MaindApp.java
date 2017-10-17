@@ -32,6 +32,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.InputMethodListener;
+import java.awt.event.InputMethodEvent;
 
 public class MaindApp {
 
@@ -42,6 +44,8 @@ public class MaindApp {
 	private JTextField textFieldPassword;
 	private JTextField textField;
 	private PostgresDB postgresDb;
+	private JList listDb;
+	private String tempUrl;
 
 	/**
 	 * Launch the application.
@@ -139,12 +143,19 @@ public class MaindApp {
 		btnTest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				postgresDb.connect(textFieldHost.getText(), textFieldPort.getText(), textFieldUsername.getText(), textFieldPassword.getText());
+				try {
+					listDb.setModel(postgresDb.listDatabases());
+				}catch(Exception s) {}
 			}
 		});
 		btnTest.setBounds(12, 166, 117, 25);
 		panelServer.add(btnTest);
 		
 		JButton btnConnect = new JButton("Connect");
+		btnConnect.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		btnConnect.setBounds(141, 166, 117, 25);
 		panelServer.add(btnConnect);
 		
@@ -152,17 +163,13 @@ public class MaindApp {
 		tabbedPaneSource.addTab("Database", null, panelDatabase, null);
 		panelDatabase.setLayout(null);
 		
-		JList list = new JList();		
-		list.setBounds(40, 12, 173, 141);
-		panelDatabase.add(list);
+		listDb = new JList();
+		listDb.setBounds(47, 43, 173, 141);
+		panelDatabase.add(listDb);
 		
-		JTextArea textAreaDbSelecionado = new JTextArea();
-		textAreaDbSelecionado.setBounds(257, 181, -122, -10);
-		panelDatabase.add(textAreaDbSelecionado);
-		
-		JLabel lblDbSelecionado = new JLabel("DB Selecionado");
-		lblDbSelecionado.setBounds(12, 169, 110, 15);
-		panelDatabase.add(lblDbSelecionado);
+		JLabel lblSelectDb = new JLabel("Select a database");
+		lblSelectDb.setBounds(66, 12, 129, 15);
+		panelDatabase.add(lblSelectDb);
 		
 		JPanel panelTables = new JPanel();
 		tabbedPaneSource.addTab("Tables", null, panelTables, null);
@@ -174,6 +181,9 @@ public class MaindApp {
 		panelTables.add(lblTables_1);
 		
 		JList listTable = new JList();
+//		postgresDb.getUrl();
+		listDb.getSelectedValue();
+		
 		listTable.setBounds(12, 22, 243, 73);
 		panelTables.add(listTable);
 		
