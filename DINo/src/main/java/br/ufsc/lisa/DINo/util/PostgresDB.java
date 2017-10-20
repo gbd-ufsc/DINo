@@ -35,15 +35,17 @@ public class PostgresDB implements RelationalDB {
 		return null;
 	}
 
-	public boolean connect(String host, String porta, String user, String password) {
-		this.url = "jdbc:postgresql://"+host+":"+porta+"/?";
+	public boolean connect(String host, String porta, String user, String password, String dbName) {
+		this.url = "jdbc:postgresql://"+host+":"+porta+"/"+ dbName;
 		 
 //		 uri = "jdbc:postgresql://localhost:5432/poi_uruguay";
 		try {
 			Class.forName(driver);
+			if(con != null) {
+				con.close();
+			}
 			con = (Connection) DriverManager.getConnection(url, user, password);
 			System.out.println("Conexão realizada com sucesso.");
-
 			return true;
 		} catch (ClassNotFoundException ex) {
 			System.err.print(ex.getMessage());
@@ -52,6 +54,7 @@ public class PostgresDB implements RelationalDB {
 			System.err.print(e.getMessage());
 			return false;
 		}		
+		
 	}
 	
 	public DefaultListModel<String> listDatabases() throws ClassNotFoundException, SQLException  {
@@ -68,6 +71,8 @@ public class PostgresDB implements RelationalDB {
         while (rs.next()) {
             listDatabase.addElement(rs.getString("datname"));
         }
+        con.close();
+        con=null;
         return listDatabase;        
     }
 	
