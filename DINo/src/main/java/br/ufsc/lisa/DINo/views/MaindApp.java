@@ -232,14 +232,16 @@ public class MaindApp {
 		panelColumns.add(lblColumn);
 		lblColumn.setFont(new Font("Dialog", Font.BOLD, 14));
 		
-		JList list = new JList();
-		list.setBounds(12, 21, 264, 144);
-		panelColumns.add(list);
+		final JList listColumns = new JList();
+		listColumns.setBounds(12, 21, 264, 144);
+		panelColumns.add(listColumns);
 		
 		JButton btnNewButton = new JButton("Refresh");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				try {
+					listColumns.setModel(postgresDb.listColumns(listTable.getSelectedValue().toString()));
+				} catch (Exception z) {}
 			}
 		});
 		btnNewButton.setBounds(12, 177, 264, 16);
@@ -264,7 +266,7 @@ public class MaindApp {
 		panelCollection.add(lblProperties);
 
 		JList listProperties = new JList();
-		listProperties.setBounds(45, 40, 173, 137);
+		listProperties.setBounds(12, 48, 243, 163);
 		panelCollection.add(listProperties);
 
 		JPanel panelExecute = new JPanel();

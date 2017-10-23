@@ -21,7 +21,7 @@ public class PostgresDB implements RelationalDB {
 	private String port;
 	private String user;
 	private String password; 
-	
+
 	public String getUrl() {
 		return url;
 	}
@@ -31,14 +31,14 @@ public class PostgresDB implements RelationalDB {
 	}
 
 	public Cursor read(String table, String keyColumns) {
-		
+
 		return null;
 	}
 
 	public boolean connect(String host, String porta, String user, String password, String dbName) {
 		this.url = "jdbc:postgresql://"+host+":"+porta+"/"+ dbName;
-		 
-//		 uri = "jdbc:postgresql://localhost:5432/poi_uruguay";
+
+		//		 uri = "jdbc:postgresql://localhost:5432/poi_uruguay";
 		try {
 			Class.forName(driver);
 			if(con != null) {
@@ -54,42 +54,62 @@ public class PostgresDB implements RelationalDB {
 			System.err.print(e.getMessage());
 			return false;
 		}		
-		
+
 	}
-	
+
 	public DefaultListModel<String> listDatabases() throws ClassNotFoundException, SQLException  {
 
-        DefaultListModel<String> listDatabase = new DefaultListModel();
+		DefaultListModel<String> listDatabase = new DefaultListModel();
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT datname from pg_database where datistemplate = false");
-        
-        Statement pstmt = con.createStatement();
-        
-        ResultSet rs = pstmt.executeQuery(sql.toString());
-        
-        while (rs.next()) {
-            listDatabase.addElement(rs.getString("datname"));
-        }
-        con.close();
-        con=null;
-        return listDatabase;        
-    }
-	
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT datname from pg_database where datistemplate = false");
+
+		Statement pstmt = con.createStatement();
+
+		ResultSet rs = pstmt.executeQuery(sql.toString());
+
+		while (rs.next()) {
+			listDatabase.addElement(rs.getString("datname"));
+		}
+		con.close();
+		con=null;
+		return listDatabase;        
+	}
+
 	public DefaultListModel<String> listTables() throws ClassNotFoundException, SQLException  {
 
-        DefaultListModel<String> listTables = new DefaultListModel();
+		DefaultListModel<String> listTables = new DefaultListModel();
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("select tablename FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') ORDER BY tablename;");
-        
-        Statement pstmt = con.createStatement();
-        
-        ResultSet rs = pstmt.executeQuery(sql.toString());
-        
-        while (rs.next()) {
-            listTables.addElement(rs.getString("tablename"));
-        }
-        return listTables;        
-    }
+		StringBuilder sql = new StringBuilder();
+		sql.append("select tablename FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') ORDER BY tablename;");
+
+		Statement pstmt = con.createStatement();
+
+		ResultSet rs = pstmt.executeQuery(sql.toString());
+
+		while (rs.next()) {
+			listTables.addElement(rs.getString("tablename"));
+		}
+		return listTables;        
+	}
+
+	public DefaultListModel<String> listColumns(String tableName) throws ClassNotFoundException, SQLException  {
+
+		
+		DefaultListModel<String> listColumns = new DefaultListModel();
+
+		if(tableName != null) {
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT column_name FROM information_schema.columns WHERE table_name ='"+tableName+"';");
+
+			Statement pstmt = con.createStatement();
+
+			ResultSet rs = pstmt.executeQuery(sql.toString());
+
+			while (rs.next()) {
+				listColumns.addElement(rs.getString("column_name"));
+			}
+		}
+		return listColumns;        
+	}
 }
