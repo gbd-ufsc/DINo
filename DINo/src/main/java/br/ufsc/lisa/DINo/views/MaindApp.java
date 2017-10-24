@@ -262,12 +262,24 @@ public class MaindApp {
 
 		JLabel lblProperties = new JLabel("Properties");
 		lblProperties.setFont(new Font("Dialog", Font.BOLD, 13));
-		lblProperties.setBounds(92, 12, 94, 24);
+		lblProperties.setBounds(94, 0, 94, 24);
 		panelCollection.add(lblProperties);
 
-		JList listProperties = new JList();
-		listProperties.setBounds(12, 48, 243, 163);
-		panelCollection.add(listProperties);
+		JList listPk = new JList();
+		listPk.setBounds(56, 23, 199, 85);
+		panelCollection.add(listPk);
+		
+		JLabel lblPk = new JLabel("PK");
+		lblPk.setBounds(12, 24, 28, 15);
+		panelCollection.add(lblPk);
+		
+		JList listValue = new JList();
+		listValue.setBounds(56, 120, 199, 91);
+		panelCollection.add(listValue);
+		
+		JLabel lblValue = new JLabel("Value");
+		lblValue.setBounds(12, 120, 58, 15);
+		panelCollection.add(lblValue);
 
 		JPanel panelExecute = new JPanel();
 		panelExecute.setBounds(12, 303, 388, 128);
