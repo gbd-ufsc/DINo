@@ -12,6 +12,7 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.swing.JLabel;
 import java.awt.Font;
@@ -20,6 +21,8 @@ import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+
 import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -253,7 +256,7 @@ public class MaindApp {
 		mainPanel.add(lblTables);
 
 		JTabbedPane tabbedPaneTarget = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPaneTarget.setBounds(317, 41, 272, 250);
+		tabbedPaneTarget.setBounds(317, 41, 272, 296);
 		mainPanel.add(tabbedPaneTarget);
 
 		JPanel panelCollection = new JPanel();
@@ -265,8 +268,8 @@ public class MaindApp {
 		lblProperties.setBounds(94, 0, 94, 24);
 		panelCollection.add(lblProperties);
 
-		JList listPk = new JList();
-		listPk.setBounds(56, 23, 199, 85);
+		final JList listPk = new JList();
+		listPk.setBounds(56, 23, 199, 98);
 		panelCollection.add(listPk);
 		
 		JLabel lblPk = new JLabel("PK");
@@ -274,15 +277,34 @@ public class MaindApp {
 		panelCollection.add(lblPk);
 		
 		JList listValue = new JList();
-		listValue.setBounds(56, 120, 199, 91);
+		listValue.setBounds(56, 151, 199, 90);
 		panelCollection.add(listValue);
 		
 		JLabel lblValue = new JLabel("Value");
-		lblValue.setBounds(12, 120, 58, 15);
+		lblValue.setBounds(12, 151, 58, 15);
 		panelCollection.add(lblValue);
+		
+		JButton btnGetSelectedColumnsPK = new JButton("Get selected columns");
+		btnGetSelectedColumnsPK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				DefaultListModel model = new DefaultListModel();
+				List <String> selecionados =  listColumns.getSelectedValuesList();
+				for (String n: selecionados ) {
+					model.addElement(n);
+				}				
+				listPk.setModel(model);
+			}
+		});
+		btnGetSelectedColumnsPK.setBounds(56, 126, 199, 20);
+		panelCollection.add(btnGetSelectedColumnsPK);
+		
+		JButton btnGetSelectedColumnsVALUE = new JButton("Get selected columns");
+		btnGetSelectedColumnsVALUE.setBounds(56, 244, 199, 20);
+		panelCollection.add(btnGetSelectedColumnsVALUE);
 
 		JPanel panelExecute = new JPanel();
-		panelExecute.setBounds(12, 303, 388, 128);
+		panelExecute.setBounds(12, 343, 390, 88);
 		mainPanel.add(panelExecute);
 		panelExecute.setLayout(null);
 
@@ -292,16 +314,16 @@ public class MaindApp {
 		panelExecute.add(lblExecute);
 
 		JLabel lblStatus = new JLabel("Status:");
-		lblStatus.setBounds(12, 56, 70, 15);
+		lblStatus.setBounds(12, 35, 70, 15);
 		panelExecute.add(lblStatus);
 
 		textField = new JTextField();
-		textField.setBounds(12, 83, 255, 33);
+		textField.setBounds(12, 52, 255, 33);
 		panelExecute.add(textField);
 		textField.setColumns(10);
 
 		JButton btnImport = new JButton("Import");
-		btnImport.setBounds(279, 83, 97, 33);
+		btnImport.setBounds(279, 52, 97, 33);
 		panelExecute.add(btnImport);
 
 		JButton btnCancel = new JButton("Cancel");
