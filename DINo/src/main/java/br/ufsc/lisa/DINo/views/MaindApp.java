@@ -269,6 +269,7 @@ public class MaindApp {
 		panelCollection.add(lblProperties);
 
 		final JList listPk = new JList();
+		listPk.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listPk.setBounds(56, 23, 199, 98);
 		panelCollection.add(listPk);
 		
@@ -276,30 +277,42 @@ public class MaindApp {
 		lblPk.setBounds(12, 24, 28, 15);
 		panelCollection.add(lblPk);
 		
-		JList listValue = new JList();
+		final JList listValue = new JList();
+		listValue.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listValue.setBounds(56, 151, 199, 90);
+		
 		panelCollection.add(listValue);
 		
 		JLabel lblValue = new JLabel("Value");
 		lblValue.setBounds(12, 151, 58, 15);
 		panelCollection.add(lblValue);
 		
-		JButton btnGetSelectedColumnsPK = new JButton("Get selected columns");
+		JButton btnGetSelectedColumnsPK = new JButton("Get selected row");
 		btnGetSelectedColumnsPK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				DefaultListModel model = new DefaultListModel();
-				List <String> selecionados =  listColumns.getSelectedValuesList();
-				for (String n: selecionados ) {
-					model.addElement(n);
+				DefaultListModel listPkTemp = new DefaultListModel();
+				List <String> selecionadosPk =  listColumns.getSelectedValuesList();
+				for (String n: selecionadosPk ) {
+					listPkTemp.addElement(n);
 				}				
-				listPk.setModel(model);
+				listPk.setModel(listPkTemp);
 			}
 		});
 		btnGetSelectedColumnsPK.setBounds(56, 126, 199, 20);
 		panelCollection.add(btnGetSelectedColumnsPK);
 		
-		JButton btnGetSelectedColumnsVALUE = new JButton("Get selected columns");
+		JButton btnGetSelectedColumnsVALUE = new JButton("Get selected row");
+		btnGetSelectedColumnsVALUE.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DefaultListModel listValueTemp = new DefaultListModel();
+				List <String> selecionadosValues =  listColumns.getSelectedValuesList();
+				for (String n: selecionadosValues ) {
+					listValueTemp.addElement(n);
+				}				
+				listValue.setModel(listValueTemp);
+			}
+		});
 		btnGetSelectedColumnsVALUE.setBounds(56, 244, 199, 20);
 		panelCollection.add(btnGetSelectedColumnsVALUE);
 
