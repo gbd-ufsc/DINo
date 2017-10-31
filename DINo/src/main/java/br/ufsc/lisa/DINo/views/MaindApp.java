@@ -48,10 +48,11 @@ public class MaindApp {
 	private JTextField textFieldPort;
 	private JTextField textFieldUsername;
 	private JTextField textFieldPassword;
-	private JTextField textField;
+	private JTextField textFieldImport;
 	private PostgresDB postgresDb;
 	private JList listDb;
 	private String tempUrl;
+	private JTextField textFieldPrefixo;
 
 	/**
 	 * Launch the application.
@@ -91,11 +92,11 @@ public class MaindApp {
 
 		JLabel lblSource = new JLabel("Source");
 		lblSource.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblSource.setBounds(96, 12, 78, 27);
+		lblSource.setBounds(97, -3, 78, 27);
 		mainPanel.add(lblSource);
 
 		JTabbedPane tabbedPaneSource = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPaneSource.setBounds(12, 41, 293, 250);
+		tabbedPaneSource.setBounds(12, 22, 293, 269);
 		mainPanel.add(tabbedPaneSource);
 
 		JPanel panelServer = new JPanel();
@@ -252,39 +253,39 @@ public class MaindApp {
 
 		JLabel lblTables = new JLabel("Target");
 		lblTables.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblTables.setBounds(419, 18, 78, 21);
+		lblTables.setBounds(422, 0, 78, 21);
 		mainPanel.add(lblTables);
 
 		JTabbedPane tabbedPaneTarget = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPaneTarget.setBounds(317, 41, 272, 296);
+		tabbedPaneTarget.setBounds(317, 22, 272, 315);
 		mainPanel.add(tabbedPaneTarget);
 
 		JPanel panelCollection = new JPanel();
 		tabbedPaneTarget.addTab("Collection", null, panelCollection, null);
 		panelCollection.setLayout(null);
 
-		JLabel lblProperties = new JLabel("Properties");
-		lblProperties.setFont(new Font("Dialog", Font.BOLD, 13));
-		lblProperties.setBounds(94, 0, 94, 24);
+		JLabel lblProperties = new JLabel("Prefixo chave");
+		lblProperties.setFont(new Font("Dialog", Font.BOLD, 12));
+		lblProperties.setBounds(12, 9, 103, 26);
 		panelCollection.add(lblProperties);
 
 		final JList listPk = new JList();
 		listPk.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listPk.setBounds(56, 23, 199, 98);
+		listPk.setBounds(56, 47, 199, 98);
 		panelCollection.add(listPk);
 		
 		JLabel lblPk = new JLabel("PK");
-		lblPk.setBounds(12, 24, 28, 15);
+		lblPk.setBounds(12, 48, 28, 15);
 		panelCollection.add(lblPk);
 		
 		final JList listValue = new JList();
 		listValue.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listValue.setBounds(56, 151, 199, 90);
+		listValue.setBounds(56, 175, 199, 90);
 		
 		panelCollection.add(listValue);
 		
 		JLabel lblValue = new JLabel("Value");
-		lblValue.setBounds(12, 151, 58, 15);
+		lblValue.setBounds(12, 175, 58, 15);
 		panelCollection.add(lblValue);
 		
 		JButton btnGetSelectedColumnsPK = new JButton("Get selected row");
@@ -299,7 +300,7 @@ public class MaindApp {
 				listPk.setModel(listPkTemp);
 			}
 		});
-		btnGetSelectedColumnsPK.setBounds(56, 126, 199, 20);
+		btnGetSelectedColumnsPK.setBounds(56, 150, 199, 20);
 		panelCollection.add(btnGetSelectedColumnsPK);
 		
 		JButton btnGetSelectedColumnsVALUE = new JButton("Get selected row");
@@ -313,8 +314,13 @@ public class MaindApp {
 				listValue.setModel(listValueTemp);
 			}
 		});
-		btnGetSelectedColumnsVALUE.setBounds(56, 244, 199, 20);
+		btnGetSelectedColumnsVALUE.setBounds(56, 268, 199, 20);
 		panelCollection.add(btnGetSelectedColumnsVALUE);
+		
+		textFieldPrefixo = new JTextField();
+		textFieldPrefixo.setBounds(111, 9, 144, 26);
+		panelCollection.add(textFieldPrefixo);
+		textFieldPrefixo.setColumns(10);
 
 		JPanel panelExecute = new JPanel();
 		panelExecute.setBounds(12, 343, 390, 88);
@@ -330,14 +336,23 @@ public class MaindApp {
 		lblStatus.setBounds(12, 35, 70, 15);
 		panelExecute.add(lblStatus);
 
-		textField = new JTextField();
-		textField.setBounds(12, 52, 255, 33);
-		panelExecute.add(textField);
-		textField.setColumns(10);
+		textFieldImport = new JTextField();
+		textFieldImport.setBounds(12, 52, 255, 33);
+		panelExecute.add(textFieldImport);
+		textFieldImport.setColumns(10);
 
 		JButton btnImport = new JButton("Import");
 		btnImport.setBounds(279, 52, 97, 33);
 		panelExecute.add(btnImport);
+		
+		JButton btnGenerateSql = new JButton("Generate sql");
+		btnGenerateSql.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+								
+			}
+		});
+		btnGenerateSql.setBounds(252, 7, 126, 33);
+		panelExecute.add(btnGenerateSql);
 
 		JButton btnCancel = new JButton("Cancel");
 		btnCancel.addActionListener(new ActionListener() {
@@ -345,7 +360,7 @@ public class MaindApp {
 				System.exit(0);
 			}
 		});
-		btnCancel.setBounds(472, 386, 117, 34);
+		btnCancel.setBounds(472, 397, 117, 34);
 		mainPanel.add(btnCancel);
 	}
 }
