@@ -113,5 +113,14 @@ public class PostgresDB implements RelationalDB {
 		return listColumns;        
 	}
 	
+	public StringBuilder getSqlCmd(String prefixo, String key, String value) throws SQLException {
+		StringBuilder sql = new StringBuilder();
+		return sql.append("SELECT '"+prefixo+"_'||id::text||'_'||version::text AS key, row_to_json(n) AS value FROM (SELECT id, version, tstamp, ST_AsGeoJSON(geom) as geom FROM nodes WHERE tags->'name' <> '' LIMIT 5) n ;");
+		
+		
+//		Statement pstmt = con.createStatement();
+//		ResultSet rs = pstmt.executeQuery(sql.toString());
+	}
+	
 	
 }
