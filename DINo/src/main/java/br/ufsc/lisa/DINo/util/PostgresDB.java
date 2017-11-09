@@ -21,7 +21,8 @@ public class PostgresDB implements RelationalDB {
 	private String port;
 	private String user;
 	private String password; 
-
+	private RedisConnector redisDb;
+	
 	public String getUrl() {
 		return url;
 	}
@@ -113,14 +114,23 @@ public class PostgresDB implements RelationalDB {
 		return listColumns;        
 	}
 	
-	public StringBuilder getSqlCmd(String prefixo, String key, String value) throws SQLException {
+	public void getDataFromPSQL(String cmdSql) throws SQLException {
+		redisDb = new RedisConnector();
+
 		StringBuilder sql = new StringBuilder();
-		return sql.append("SELECT '"+prefixo+"_'||id::text||'_'||version::text AS key, row_to_json(n) AS value FROM (SELECT id, version, tstamp, ST_AsGeoJSON(geom) as geom FROM nodes WHERE tags->'name' <> '' LIMIT 5) n ;");
+		sql.append(""+cmdSql+"");
+		Statement pstmt = con.createStatement();
 		
+		ResultSet result = pstmt.executeQuery(sql.toString());
 		
-//		Statement pstmt = con.createStatement();
-//		ResultSet rs = pstmt.executeQuery(sql.toString());
+		while (result.next()) {
+			String key =  result.getString("?column?");
+			String value =  result.getString("value");
+			redisDb.connect("localhost");
+			redisDb.put(key, value);
+		}
 	}
 	
-	
 }
+	
+	
