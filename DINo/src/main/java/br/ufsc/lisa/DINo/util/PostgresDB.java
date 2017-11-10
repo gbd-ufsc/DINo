@@ -12,6 +12,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 
 import com.mongodb.Cursor;
+import com.mongodb.util.JSON;
 
 public class PostgresDB implements RelationalDB {
 
@@ -116,6 +117,7 @@ public class PostgresDB implements RelationalDB {
 	
 	public void getDataFromPSQL(String cmdSql) throws SQLException {
 		redisDb = new RedisConnector();
+		redisDb.connect("localhost");
 
 		StringBuilder sql = new StringBuilder();
 		sql.append(""+cmdSql+"");
@@ -126,8 +128,8 @@ public class PostgresDB implements RelationalDB {
 		while (result.next()) {
 			String key =  result.getString("?column?");
 			String value =  result.getString("value");
-			redisDb.connect("localhost");
-			redisDb.put(key, value);
+			redisDb.set(key, value);
+			System.out.println(key);
 		}
 	}
 	

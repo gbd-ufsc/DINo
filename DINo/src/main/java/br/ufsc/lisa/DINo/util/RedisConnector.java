@@ -16,12 +16,13 @@ public class RedisConnector implements Connector {
 	String db;
 
 	public void connect(String uri) {
-		jedis = new Jedis("localhost");
+		jedis = new Jedis(uri);
 		db = uri;
 //		jedis = pool.getResource();
+		
 	}
 
-	public boolean put(String key, JSON value) {
+	public boolean set(String key, String value) {
 		if (jedis != null) {
 			String rkey = key;
 			String rvalue = value.toString();
@@ -31,10 +32,11 @@ public class RedisConnector implements Connector {
 		}
 		return false;
 	}
+	
 
-	public boolean put(String key, String json) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+//	public boolean put(String key, String json) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
 
 }
