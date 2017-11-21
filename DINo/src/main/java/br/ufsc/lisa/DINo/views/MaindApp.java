@@ -59,6 +59,10 @@ public class MaindApp {
 	private String tempUrl;
 	private JTextField textFieldPrefixo;
 	private JTextField textFieldConsole;
+	private JTextField textFieldRedisHost;
+	private JTextField textFieldRedisPort;
+	private JTextField textFieldRedisUser;
+	private JTextField textFieldRedisPassword;
 
 	/**
 	 * Launch the application.
@@ -98,8 +102,8 @@ public class MaindApp {
 		mainPanel.setLayout(null);
 
 		JLabel lblSource = new JLabel("Source");
-		lblSource.setFont(new Font("Dialog", Font.BOLD, 14));
 		lblSource.setBounds(97, -3, 78, 27);
+		lblSource.setFont(new Font("Dialog", Font.BOLD, 14));
 		mainPanel.add(lblSource);
 
 		JTabbedPane tabbedPaneSource = new JTabbedPane(JTabbedPane.TOP);
@@ -110,9 +114,9 @@ public class MaindApp {
 		tabbedPaneSource.addTab("Server", null, panelServer, null);
 		panelServer.setLayout(null);
 
-		JLabel lblConnection = new JLabel("Connection");
+		JLabel lblConnection = new JLabel("Connection Postgres");
 		lblConnection.setFont(new Font("Dialog", Font.BOLD, 13));
-		lblConnection.setBounds(12, 12, 101, 15);
+		lblConnection.setBounds(12, 12, 153, 17);
 		panelServer.add(lblConnection);
 
 		JLabel lblHost = new JLabel("Host: ");
@@ -153,6 +157,12 @@ public class MaindApp {
 		textFieldPassword.setBounds(92, 139, 163, 19);
 		panelServer.add(textFieldPassword);
 		textFieldPassword.setColumns(10);
+		
+		textFieldConsole = new JTextField();
+		textFieldConsole.setBounds(12, 396, 448, 34);
+		textFieldConsole.setEditable(false);
+		mainPanel.add(textFieldConsole);
+		textFieldConsole.setColumns(10);
 
 		JButton btnTest = new JButton("Connect");
 		btnTest.addActionListener(new ActionListener() {
@@ -192,7 +202,7 @@ public class MaindApp {
 		panelDatabase.setLayout(null);
 		listDb.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listDb.setVisibleRowCount(6);
-		listDb.setBounds(23, 39, 239, 145);
+		listDb.setBounds(23, 39, 239, 173);
 //		JScrollPane listScroller = new JScrollPane();
 //      listScroller.setViewportView(listDb);
         listDb.setLayoutOrientation(JList.VERTICAL);
@@ -214,12 +224,20 @@ public class MaindApp {
 		panelTables.add(lblTables_1);
 
 		final JList listTable = new JList();
+		listTable.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				textFieldConsole.setText("Selecionado tabela "+ listTable.getSelectedValue().toString());
+				}
+		});
+	
 		listTable.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
 				try {
 					listTable.setModel(postgresDb.listTables());
-				} catch (Exception t) {
+					textFieldConsole.setText("Selecione uma tabela");
+					} catch (Exception t) {
 				}
 			}
 		});
@@ -229,7 +247,7 @@ public class MaindApp {
 		} catch (Exception n) {
 
 		}
-		listTable.setBounds(12, 29, 264, 137);
+		listTable.setBounds(12, 29, 264, 183);
 		panelTables.add(listTable);
 
 		JPanel panelColumns = new JPanel();
@@ -247,16 +265,17 @@ public class MaindApp {
 			public void focusGained(FocusEvent e) {
 				try {
 					listColumns.setModel(postgresDb.listColumns(listTable.getSelectedValue().toString()));
+					textFieldConsole.setText("Selecione as colunas desejadas para Primary Key e Value");
 				} catch (Exception z) {
 				}
 			}
 		});
-		listColumns.setBounds(12, 21, 264, 144);
+		listColumns.setBounds(12, 21, 264, 191);
 		panelColumns.add(listColumns);
 
 		JLabel lblTables = new JLabel("Target");
-		lblTables.setFont(new Font("Dialog", Font.BOLD, 14));
 		lblTables.setBounds(422, 0, 78, 21);
+		lblTables.setFont(new Font("Dialog", Font.BOLD, 14));
 		mainPanel.add(lblTables);
 
 		JTabbedPane tabbedPaneTarget = new JTabbedPane(JTabbedPane.TOP);
@@ -301,7 +320,9 @@ public class MaindApp {
 					listPkTemp.addElement(n);
 				}
 				listPk.setModel(listPkTemp);
+				textFieldConsole.setText("Selecionado colunas "+ listPkTemp.toString() +" como Primary Keys");
 			}
+			
 		});
 		btnGetSelectedColumnsPK.setBounds(58, 134, 199, 25);
 		panelCollection.add(btnGetSelectedColumnsPK);
@@ -315,6 +336,7 @@ public class MaindApp {
 					listValueTemp.addElement(n);
 				}
 				listValue.setModel(listValueTemp);
+				textFieldConsole.setText("Selecionado colunas "+ listValueTemp.toString() +" como Values");
 			}
 		});
 		btnGetSelectedColumnsVALUE.setBounds(58, 259, 199, 25);
@@ -324,6 +346,68 @@ public class MaindApp {
 		textFieldPrefixo.setBounds(111, 9, 144, 26);
 		panelCollection.add(textFieldPrefixo);
 		textFieldPrefixo.setColumns(10);
+		
+		JPanel panelRedisConnector = new JPanel();
+		panelRedisConnector.setLayout(null);
+		tabbedPaneTarget.addTab("Redis Connector", null, panelRedisConnector, null);
+		
+		JLabel labelRedis = new JLabel("Redis");
+		labelRedis.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				textFieldConsole.setText("Forneça detalhes para conexão com Redis");
+			}
+		});
+		labelRedis.setFont(new Font("Dialog", Font.BOLD, 13));
+		labelRedis.setBounds(12, 12, 101, 15);
+		panelRedisConnector.add(labelRedis);
+		
+		JLabel labelRedisHost = new JLabel("Host: ");
+		labelRedisHost.setBounds(12, 58, 50, 15);
+		panelRedisConnector.add(labelRedisHost);
+		
+		JLabel labelRedisPort = new JLabel("Port: ");
+		labelRedisPort.setBounds(12, 85, 70, 15);
+		panelRedisConnector.add(labelRedisPort);
+		
+		JLabel labelRedisUser = new JLabel("Username: ");
+		labelRedisUser.setBounds(12, 112, 101, 15);
+		panelRedisConnector.add(labelRedisUser);
+		
+		JLabel labelRedisPassword = new JLabel("Password: ");
+		labelRedisPassword.setBounds(12, 139, 101, 15);
+		panelRedisConnector.add(labelRedisPassword);
+		
+		textFieldRedisHost = new JTextField();
+		textFieldRedisHost.setText("localhost");
+		textFieldRedisHost.setColumns(10);
+		textFieldRedisHost.setBounds(92, 56, 163, 19);
+		panelRedisConnector.add(textFieldRedisHost);
+		
+		textFieldRedisPort = new JTextField();
+		textFieldRedisPort.setColumns(10);
+		textFieldRedisPort.setBounds(92, 83, 163, 19);
+		panelRedisConnector.add(textFieldRedisPort);
+		
+		textFieldRedisUser = new JTextField();
+		textFieldRedisUser.setColumns(10);
+		textFieldRedisUser.setBounds(92, 112, 163, 19);
+		panelRedisConnector.add(textFieldRedisUser);
+		
+		textFieldRedisPassword = new JTextField();
+		textFieldRedisPassword.setColumns(10);
+		textFieldRedisPassword.setBounds(92, 139, 163, 19);
+		panelRedisConnector.add(textFieldRedisPassword);
+		
+		JButton buttonRedisConnect = new JButton("Connect");
+		buttonRedisConnect.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				textFieldConsole.setText("Conexão estável com BD Redis");
+			}
+		});
+		buttonRedisConnect.setBounds(12, 251, 243, 25);
+		panelRedisConnector.add(buttonRedisConnect);
 
 		JPanel panelExecute = new JPanel();
 		panelExecute.setBounds(0, 303, 465, 78);
@@ -369,26 +453,23 @@ public class MaindApp {
 				textFieldImport.setText("SELECT '" + textFieldPrefixo.getText() + "_'||" + tempPk
 						+ ", (SELECT row_to_json(_) FROM (SELECT " + tempValue + ") AS _ ) AS VALUE FROM "
 						+ listTable.getSelectedValue().toString()+" limit 5;");
-			}
+				textFieldConsole.setText("Gerado comando SQL para importação de dados");
+			}		
 		});
 
 		btnGenerateSql.setBounds(185, 7, 126, 25);
 		panelExecute.add(btnGenerateSql);
 
 		JButton btnCancel = new JButton("Cancel");
+		btnCancel.setBounds(472, 400, 117, 25);
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
 			}
 		});
-		btnCancel.setBounds(472, 400, 117, 25);
 		mainPanel.add(btnCancel);
 		
-		textFieldConsole = new JTextField();
-		textFieldConsole.setEditable(false);
-		textFieldConsole.setBounds(12, 396, 448, 34);
-		mainPanel.add(textFieldConsole);
-		textFieldConsole.setColumns(10);
+		
 		
 		JLabel lblConsole = new JLabel("Console:");
 		lblConsole.setBounds(12, 381, 70, 15);
@@ -397,15 +478,16 @@ public class MaindApp {
 				JButton btnImport = new JButton("Import");
 				btnImport.setBounds(472, 349, 117, 25);
 				mainPanel.add(btnImport);
-				btnImport.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						 try {
-						 postgresDb.getDataFromPSQL(textFieldImport.getText().toString());
-						 
-						 } catch (SQLException e1) {
-							 textFieldConsole.setText("Error SQL Exception");
-						 }
-					}
-				});
+//				btnImport.addActionListener(new ActionListener() {
+//					public void actionPerformed(ActionEvent e) {
+//						 try {
+//						 postgresDb.getDataFromPSQL(textFieldImport.getText().toString(), );
+//						 textFieldConsole.setText("Importado dados para Redis com sucesso");
+//						 } catch (SQLException e1) {
+//							 textFieldConsole.setText("Error SQL Exception");
+//						 }
+//						 
+//					}
+//				});
 	}
 }

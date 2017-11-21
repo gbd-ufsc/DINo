@@ -118,9 +118,9 @@ public class PostgresDB implements RelationalDB {
 		return listColumns;        
 	}
 	
-	public void getDataFromPSQL(String cmdSql) throws SQLException {
+	public void getDataFromPSQL(String cmdSql, String host) throws SQLException {
 		redisDb = new RedisConnector();
-		redisDb.connect("localhost");
+		redisDb.connect(host);
 
 		StringBuilder sql = new StringBuilder();
 		sql.append(""+cmdSql+"");
@@ -135,7 +135,7 @@ public class PostgresDB implements RelationalDB {
 			System.out.println(key);
 		}
 	}
-	
+//	redisDb.close();
 }
 	
 	
