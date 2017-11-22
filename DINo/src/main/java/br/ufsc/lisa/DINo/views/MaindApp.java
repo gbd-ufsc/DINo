@@ -34,6 +34,7 @@ import java.awt.SystemColor;
 import java.awt.Color;
 import br.ufsc.lisa.DINo.util.PostgresDB;
 import br.ufsc.lisa.DINo.util.RedisConnector;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
@@ -83,6 +84,7 @@ public class MaindApp {
 	public MaindApp() throws ClassNotFoundException, SQLException {
 		initialize();
 		postgresDb = new PostgresDB();
+		redisDb = new RedisConnector();
 	}
 
 	private void initialize() throws ClassNotFoundException, SQLException {
@@ -379,7 +381,6 @@ public class MaindApp {
 		panelRedisConnector.add(labelRedisPassword);
 		
 		textFieldRedisHost = new JTextField();
-		textFieldRedisHost.setText("localhost");
 		textFieldRedisHost.setColumns(10);
 		textFieldRedisHost.setBounds(92, 56, 163, 19);
 		panelRedisConnector.add(textFieldRedisHost);
@@ -402,10 +403,11 @@ public class MaindApp {
 		JButton buttonRedisConnect = new JButton("Connect");
 		buttonRedisConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				redisDb.connect(textFieldHost.getText().toString());
 				textFieldConsole.setText("Conexão estável com BD Redis");
-			}
+			}			
 		});
+		
 		buttonRedisConnect.setBounds(12, 251, 243, 25);
 		panelRedisConnector.add(buttonRedisConnect);
 
@@ -478,16 +480,18 @@ public class MaindApp {
 				JButton btnImport = new JButton("Import");
 				btnImport.setBounds(472, 349, 117, 25);
 				mainPanel.add(btnImport);
-//				btnImport.addActionListener(new ActionListener() {
-//					public void actionPerformed(ActionEvent e) {
-//						 try {
-//						 postgresDb.getDataFromPSQL(textFieldImport.getText().toString(), );
-//						 textFieldConsole.setText("Importado dados para Redis com sucesso");
-//						 } catch (SQLException e1) {
-//							 textFieldConsole.setText("Error SQL Exception");
-//						 }
-//						 
-//					}
-//				});
+				btnImport.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						 try {
+						 postgresDb.getDataFromPSQL(textFieldImport.getText().toString(), textFieldRedisHost.getText().toString());
+						 textFieldConsole.setText("Importado dados para Redis com sucesso");
+						 } catch (SQLException e1) {
+							 textFieldConsole.setText("Error SQL Exception");
+						 } catch (JedisConnectionException e2) {
+							 textFieldConsole.setText("Favor inserir um host valido para banco Redis");
+						 }
+						 
+					}
+				});
 	}
 }

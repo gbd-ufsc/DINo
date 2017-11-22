@@ -132,7 +132,7 @@ public class PostgresDB implements RelationalDB {
 			String key =  result.getString("?column?");
 			String value =  result.getString("value");
 			redisDb.set(key, value);
-			System.out.println(key);
+			System.out.println("Chave: " + key);
 		}
 	}
 //	redisDb.close();
