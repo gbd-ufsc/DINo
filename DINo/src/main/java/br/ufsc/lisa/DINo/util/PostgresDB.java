@@ -39,7 +39,7 @@ public class PostgresDB implements RelationalDB {
 
 	public boolean connect(String host, String porta, String user, String password, String dbName) {
 		this.url = "jdbc:postgresql://"+host+":"+porta+"/"+ dbName;
-
+		
 		//		 uri = "jdbc:postgresql://localhost:5432/poi_uruguay";
 		try {
 			Class.forName(driver);
@@ -47,8 +47,10 @@ public class PostgresDB implements RelationalDB {
 				con.close();
 			}
 			con = (Connection) DriverManager.getConnection(url, user, password);
-			System.out.println("Conexão realizada com sucesso.");
+			if(dbName == "?") {
+				System.out.println("Conexão estável, favor selecionar um banco de dados.");
 			return true;
+			}
 		} catch (ClassNotFoundException ex) {
 			System.err.print(ex.getMessage());
 			return false;
@@ -56,7 +58,8 @@ public class PostgresDB implements RelationalDB {
 			System.err.print(e.getMessage());
 			return false;
 		}		
-
+		System.out.println("Conexão estável com o banco de dados " + dbName);
+		return true;
 	}
 
 	public DefaultListModel<String> listDatabases() throws ClassNotFoundException, SQLException  {
@@ -115,9 +118,9 @@ public class PostgresDB implements RelationalDB {
 		return listColumns;        
 	}
 	
-	public void getDataFromPSQL(String cmdSql) throws SQLException {
+	public void getDataFromPSQL(String cmdSql, String host) throws SQLException {
 		redisDb = new RedisConnector();
-		redisDb.connect("localhost");
+		redisDb.connect(host);
 
 		StringBuilder sql = new StringBuilder();
 		sql.append(""+cmdSql+"");
@@ -129,10 +132,10 @@ public class PostgresDB implements RelationalDB {
 			String key =  result.getString("?column?");
 			String value =  result.getString("value");
 			redisDb.set(key, value);
-			System.out.println(key);
+			System.out.println("Chave: " + key);
 		}
 	}
-	
+//	redisDb.close();
 }
 	
 	
