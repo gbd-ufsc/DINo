@@ -25,7 +25,7 @@ public class TestList {
             public void run() {
             	JPanel panel = new JPanel(new BorderLayout());
 
-                List<String> labels = new ArrayList<>(25);
+                List<String> labels = new ArrayList<String>(25);
                 for (int index = 0; index < 100; index++) {
                     labels.add("Item " + index);
                 }

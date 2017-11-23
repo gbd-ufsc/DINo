@@ -36,8 +36,9 @@ import br.ufsc.lisa.DINo.util.PostgresDB;
 import br.ufsc.lisa.DINo.util.RedisConnector;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.InputMethodListener;
@@ -227,10 +228,10 @@ public class MaindApp {
 
 		final JList listTable = new JList();
 		listTable.addListSelectionListener(new ListSelectionListener() {
-			@Override
+			
 			public void valueChanged(ListSelectionEvent e) {
 				textFieldConsole.setText("Selecionado tabela "+ listTable.getSelectedValue().toString());
-				}
+			}
 		});
 	
 		listTable.addFocusListener(new FocusAdapter() {
