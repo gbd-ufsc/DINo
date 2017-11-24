@@ -90,7 +90,7 @@ public class MaindApp {
 
 	private void initialize() throws ClassNotFoundException, SQLException {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 607, 475);
+		frame.setBounds(100, 100, 636, 525);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 
@@ -110,7 +110,7 @@ public class MaindApp {
 		mainPanel.add(lblSource);
 
 		JTabbedPane tabbedPaneSource = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPaneSource.setBounds(12, 22, 293, 269);
+		tabbedPaneSource.setBounds(12, 22, 293, 315);
 		mainPanel.add(tabbedPaneSource);
 
 		JPanel panelServer = new JPanel();
@@ -162,7 +162,7 @@ public class MaindApp {
 		textFieldPassword.setColumns(10);
 		
 		textFieldConsole = new JTextField();
-		textFieldConsole.setBounds(12, 396, 448, 34);
+		textFieldConsole.setBounds(12, 454, 448, 34);
 		textFieldConsole.setEditable(false);
 		mainPanel.add(textFieldConsole);
 		textFieldConsole.setColumns(10);
@@ -413,7 +413,7 @@ public class MaindApp {
 		panelRedisConnector.add(buttonRedisConnect);
 
 		JPanel panelExecute = new JPanel();
-		panelExecute.setBounds(0, 303, 465, 78);
+		panelExecute.setBounds(0, 349, 465, 83);
 		mainPanel.add(panelExecute);
 		panelExecute.setLayout(null);
 
@@ -464,7 +464,7 @@ public class MaindApp {
 		panelExecute.add(btnGenerateSql);
 
 		JButton btnCancel = new JButton("Cancel");
-		btnCancel.setBounds(472, 400, 117, 25);
+		btnCancel.setBounds(472, 458, 117, 25);
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
@@ -475,11 +475,11 @@ public class MaindApp {
 		
 		
 		JLabel lblConsole = new JLabel("Console:");
-		lblConsole.setBounds(12, 381, 70, 15);
+		lblConsole.setBounds(12, 439, 70, 15);
 		mainPanel.add(lblConsole);
 		
 				JButton btnImport = new JButton("Import");
-				btnImport.setBounds(472, 349, 117, 25);
+				btnImport.setBounds(472, 395, 117, 25);
 				mainPanel.add(btnImport);
 				btnImport.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
