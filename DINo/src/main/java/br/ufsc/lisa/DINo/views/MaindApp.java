@@ -282,7 +282,7 @@ public class MaindApp {
 		mainPanel.add(lblTables);
 
 		JTabbedPane tabbedPaneTarget = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPaneTarget.setBounds(317, 22, 272, 315);
+		tabbedPaneTarget.setBounds(317, 22, 272, 331);
 		mainPanel.add(tabbedPaneTarget);
 
 		JPanel panelCollection = new JPanel();
@@ -296,7 +296,7 @@ public class MaindApp {
 
 		final JList listPk = new JList();
 		listPk.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listPk.setBounds(58, 36, 199, 98);
+		listPk.setBounds(58, 36, 199, 90);
 		panelCollection.add(listPk);
 
 		JLabel lblPk = new JLabel("PK");
@@ -305,7 +305,7 @@ public class MaindApp {
 
 		final JList listValue = new JList();
 		listValue.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listValue.setBounds(58, 166, 199, 90);
+		listValue.setBounds(58, 166, 199, 82);
 
 		panelCollection.add(listValue);
 
