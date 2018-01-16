@@ -5,23 +5,14 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-
-import com.mongodb.Cursor;
-import com.mongodb.util.JSON;
 
 public class PostgresDB implements RelationalDB {
 
 	private String driver = "org.postgresql.Driver";
 	private Connection con = null;
 	private String url;
-	private String port;
-	private String user;
-	private String password; 
 	private RedisConnector redisDb;
 	
 	public String getUrl() {
@@ -32,15 +23,9 @@ public class PostgresDB implements RelationalDB {
 		this.url = url;
 	}
 
-	public Cursor read(String table, String keyColumns) {
-
-		return null;
-	}
-
 	public boolean connect(String host, String porta, String user, String password, String dbName) {
 		this.url = "jdbc:postgresql://"+host+":"+porta+"/"+ dbName;
 		
-		//		 uri = "jdbc:postgresql://localhost:5432/poi_uruguay";
 		try {
 			Class.forName(driver);
 			if(con != null) {
@@ -62,9 +47,9 @@ public class PostgresDB implements RelationalDB {
 		return true;
 	}
 
-	public DefaultListModel<String> listDatabases() throws ClassNotFoundException, SQLException  {
+	public List<String> listDatabases() throws ClassNotFoundException, SQLException  {
 
-		DefaultListModel<String> listDatabase = new DefaultListModel();
+		List<String> listDatabase = new LinkedList();
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT datname from pg_database where datistemplate = false");
@@ -74,16 +59,16 @@ public class PostgresDB implements RelationalDB {
 		ResultSet rs = pstmt.executeQuery(sql.toString());
 
 		while (rs.next()) {
-			listDatabase.addElement(rs.getString("datname"));
+			listDatabase.add(rs.getString("datname"));
 		}
 		con.close();
 		con=null;
 		return listDatabase;        
 	}
 
-	public DefaultListModel<String> listTables() throws ClassNotFoundException, SQLException  {
+	public List<String> listTables() throws ClassNotFoundException, SQLException  {
 
-		DefaultListModel<String> listTables = new DefaultListModel();
+		List<String> listTables = new LinkedList<String>();
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("select tablename FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') ORDER BY tablename;");
@@ -93,15 +78,15 @@ public class PostgresDB implements RelationalDB {
 		ResultSet rs = pstmt.executeQuery(sql.toString());
 
 		while (rs.next()) {
-			listTables.addElement(rs.getString("tablename"));
+			listTables.add(rs.getString("tablename"));
 		}
 		return listTables;        
 	}
 
-	public DefaultListModel<String> listColumns(String tableName) throws ClassNotFoundException, SQLException  {
+	public List<String> listColumns(String tableName) throws ClassNotFoundException, SQLException  {
 
 		
-		DefaultListModel<String> listColumns = new DefaultListModel();
+		List<String> listColumns = new LinkedList<String>();
 
 		if(tableName != null) {
 			StringBuilder sql = new StringBuilder();
@@ -112,16 +97,15 @@ public class PostgresDB implements RelationalDB {
 			ResultSet rs = pstmt.executeQuery(sql.toString());
 
 			while (rs.next()) {
-				listColumns.addElement(rs.getString("column_name"));
+				listColumns.add(rs.getString("column_name"));
 			}
 		}
 		return listColumns;        
 	}
 	
-	public void getDataFromPSQL(String cmdSql, String host) throws SQLException {
-		redisDb = new RedisConnector();
-		redisDb.connect(host);
-
+	@Override
+	public void exportRelationalDataToNoSQL(String cmdSql, Connector host) throws SQLException {
+		
 		StringBuilder sql = new StringBuilder();
 		sql.append(""+cmdSql+"");
 		Statement pstmt = con.createStatement();
@@ -131,11 +115,11 @@ public class PostgresDB implements RelationalDB {
 		while (result.next()) {
 			String key =  result.getString("?column?");
 			String value =  result.getString("value");
-			redisDb.set(key, value);
+			host.put(key, value);
 			System.out.println("Chave: " + key);
 		}
+		
 	}
-//	redisDb.close();
 }
 	
 	

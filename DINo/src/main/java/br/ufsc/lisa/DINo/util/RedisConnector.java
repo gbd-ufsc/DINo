@@ -11,18 +11,34 @@ import redis.clients.jedis.JedisPoolConfig;
 public class RedisConnector implements Connector {
 
 	// private MongoClient client;
-	Jedis jedis;
-	JedisPool pool;
-	String db;
+	private Jedis jedis;
+	private JedisPool pool;
+	private String db;
+	private Integer port;
+	private String password;
 
-	public void connect(String uri) {
-		jedis = new Jedis(uri);
+	public boolean connect(String uri, String port, String user, String password) {
+		
+		try {
+			jedis = new Jedis(uri, Integer.valueOf(port));
+			if(password != null & !password.isEmpty())
+				jedis.auth(password);
+			jedis.connect();
+			jedis.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 		db = uri;
+		this.port = Integer.valueOf(port);
+		this.password =  password;
 //		jedis = pool.getResource();
+		return true;
 		
 	}
 
-	public boolean set(String key, String value) {
+	@Override
+	public boolean put(String key, String value) {
 		if (jedis != null) {
 			String rkey = key;
 			String rvalue = value.toString();
@@ -33,10 +49,16 @@ public class RedisConnector implements Connector {
 		return false;
 	}
 	
+	@Override
+	public void close() {
+		this.jedis.close();
+	}
 
-//	public boolean put(String key, String json) {
-//		// TODO Auto-generated method stub
-//		return false;
-//	}
+	@Override
+	public String toString() {
+		return "Redis DB";
+	}
+
+
 
 }
