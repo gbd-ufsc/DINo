@@ -59,6 +59,12 @@ public class RedisConnector implements Connector {
 		return "Redis DB";
 	}
 
+	@Override
+	public boolean connect(String uri, String port, String user, String password, String DB) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 
 }
