@@ -17,7 +17,7 @@ public class RedisConnector implements Connector {
 	private Integer port;
 	private String password;
 
-	public boolean connect(String uri, String port, String user, String password) {
+	public boolean connect(String uri, String port, String password) {
 		
 		try {
 			jedis = new Jedis(uri, Integer.valueOf(port));
@@ -61,8 +61,7 @@ public class RedisConnector implements Connector {
 
 	@Override
 	public boolean connect(String uri, String port, String user, String password, String DB) {
-		// TODO Auto-generated method stub
-		return false;
+		return this.connect(uri, port, password);
 	}
 
 
