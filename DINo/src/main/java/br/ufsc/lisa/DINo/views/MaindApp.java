@@ -33,6 +33,7 @@ import javax.swing.JCheckBox;
 import java.awt.SystemColor;
 import java.awt.Color;
 
+import br.ufsc.lisa.DINo.util.CassadraConnector;
 import br.ufsc.lisa.DINo.util.Connector;
 import br.ufsc.lisa.DINo.util.MongoConnector;
 import br.ufsc.lisa.DINo.util.PostgresDB;
@@ -436,8 +437,10 @@ public class MaindApp {
 		panelTargetNoSQL.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentShown(ComponentEvent arg0) {
+				comboBoxTargets.removeAllItems();
 				comboBoxTargets.addItem(new RedisConnector());
 				comboBoxTargets.addItem(new MongoConnector());
+				comboBoxTargets.addItem(new CassadraConnector());
 			}
 		});
 		panelTargetNoSQL.setLayout(null);
@@ -625,7 +628,7 @@ public class MaindApp {
 				btnImport.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						 try {
-						 postgresDb.exportRelationalDataToNoSQL(textFieldImport.getText().toString(), targetDb);
+						 postgresDb.exportRelationalDataToNoSQL(textFieldImport.getText().toString(), targetDb, listTable.getSelectedValue().toString());
 						 textFieldConsole.setText("Importado dados para Redis com sucesso");
 						 } catch (SQLException e1) {
 							 textFieldConsole.setText("Error SQL Exception");

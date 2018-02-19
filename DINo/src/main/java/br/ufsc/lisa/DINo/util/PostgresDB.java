@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -104,22 +105,72 @@ public class PostgresDB implements RelationalDB {
 	}
 	
 	@Override
-	public void exportRelationalDataToNoSQL(String cmdSql, Connector host) throws SQLException {
+	public void exportRelationalDataToNoSQL(String cmdSql, Connector host, String table) throws SQLException {
+		this.exportRelationalDataToNoSQLP(cmdSql, host, table);
+//		StringBuilder sql = new StringBuilder();
+//		sql.append(""+cmdSql+"");
+//		Statement pstmt = con.createStatement();
+//		
+//		ResultSet result = pstmt.executeQuery(sql.toString());
+//		while (result.next()) {
+//			String key =  result.getString("?column?");
+//			String value =  result.getString("value");
+//			host.put(key, value);
+//			System.out.println("Chave: " + key);
+//		}
+		
+	}
+	
+	
+public void exportRelationalDataToNoSQLP(String cmdSql, Connector host, String table) throws SQLException {
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append(""+cmdSql+"");
 		Statement pstmt = con.createStatement();
 		
-		ResultSet result = pstmt.executeQuery(sql.toString());
+		ResultSet result = pstmt.executeQuery("SELECT COUNT(*) as total FROM "+ table);
+		int total=0;
+		if (result.next())
+			total = result.getInt("total");
+		else {
+			System.err.println("Não possui resultado para o COUNT!");
+			return;
+		}
+		result.close();
 		
-		while (result.next()) {
-			String key =  result.getString("?column?");
-			String value =  result.getString("value");
-			host.put(key, value);
-			System.out.println("Chave: " + key);
+		int cores = Runtime.getRuntime().availableProcessors();
+		
+		int registrosCore = total/cores+1;
+		
+		ArrayList<Thread> threads = new ArrayList<>();
+		
+		for (int i=0; i< cores; i++) {
+			final String query = sql+" limit "+(registrosCore) + " offset "+registrosCore*i;
+			threads.add(new Thread(()->{
+				try {
+					this.exportRecords(query,host);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}));
 		}
 		
+		for(Thread t : threads)
+			t.start();
+		
 	}
+
+private void exportRecords(String query,Connector host) throws SQLException {
+	Statement pstmt = con.createStatement();
+	ResultSet result = pstmt.executeQuery(query);
+	while (result.next()) {
+		String key =  result.getString("?column?");
+		String value =  result.getString("value");
+		host.put(key, value);
+		System.out.println("Chave: " + key);
+	}
+}
+	
 }
 	
 	
