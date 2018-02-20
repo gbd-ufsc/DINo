@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import redis.clients.jedis.Jedis;
+
 public class PostgresDB implements RelationalDB {
 
 	private String driver = "org.postgresql.Driver";
@@ -140,7 +142,7 @@ public void exportRelationalDataToNoSQLP(String cmdSql, Connector host, String t
 		
 		int cores = Runtime.getRuntime().availableProcessors();
 		
-		int registrosCore = total/cores+1;
+		long registrosCore = total/cores+1;
 		
 		ArrayList<Thread> threads = new ArrayList<>();
 		
@@ -158,17 +160,37 @@ public void exportRelationalDataToNoSQLP(String cmdSql, Connector host, String t
 		for(Thread t : threads)
 			t.start();
 		
+		for(Thread t : threads)
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
 	}
 
 private void exportRecords(String query,Connector host) throws SQLException {
 	Statement pstmt = con.createStatement();
 	ResultSet result = pstmt.executeQuery(query);
-	while (result.next()) {
-		String key =  result.getString("?column?");
-		String value =  result.getString("value");
-		host.put(key, value);
-		System.out.println("Chave: " + key);
+	if (host instanceof RedisConnector) {
+		RedisConnector rc = (RedisConnector) host;
+		Jedis jedis = rc.pool.getResource();
+		while (result.next()) {
+			String key =  result.getString("?column?");
+			String value =  result.getString("value");
+			jedis.set(key, value);
+			System.out.println("Chave: " + key);
+		}
+	} else {
+		while (result.next()) {
+			String key =  result.getString("?column?");
+			String value =  result.getString("value");
+			host.put(key, value);
+			System.out.println("Chave: " + key);
+		}
 	}
+	
 }
 	
 }
