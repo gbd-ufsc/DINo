@@ -12,6 +12,8 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -52,6 +54,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JPasswordField;
+import javax.swing.JProgressBar;
+import javax.swing.JTextPane;
 
 public class MaindApp {
 
@@ -66,7 +70,7 @@ public class MaindApp {
 	private JList listDb;
 	private String tempUrl;
 	private JTextField textFieldPrefixo;
-	private JTextField textFieldConsole;
+	private JTextPane textFieldConsole;
 	private JTextField textFieldRedisHost;
 	private JTextField textFieldRedisPort;
 	private JTextField textFieldRedisPassword;
@@ -108,6 +112,15 @@ public class MaindApp {
 			}
 		});
 	}
+	
+	public void writeLog(String message) {
+		SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("HH:mm:ss");
+		this.textFieldConsole.setText(this.textFieldConsole.getText()+
+				simpleTimeFormat.format(new Date())+"\t"+
+				message +
+				"\n"
+			);
+	}
 
 	public MaindApp() throws ClassNotFoundException, SQLException {
 		initialize();
@@ -117,7 +130,7 @@ public class MaindApp {
 
 	private void initialize() throws ClassNotFoundException, SQLException {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 660, 525);
+		frame.setBounds(100, 100, 660, 654);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		
@@ -192,11 +205,13 @@ public class MaindApp {
 		panelServer.add(textFieldPassword);
 		textFieldPassword.setColumns(10);
 		
-		textFieldConsole = new JTextField();
-		textFieldConsole.setBounds(12, 454, 448, 34);
+		JScrollPane scrollPane_5 = new JScrollPane();
+		scrollPane_5.setBounds(12, 501, 617, 116);
+		mainPanel.add(scrollPane_5);
+		
+		textFieldConsole = new JTextPane();
+		scrollPane_5.setViewportView(textFieldConsole);
 		textFieldConsole.setEditable(false);
-		mainPanel.add(textFieldConsole);
-		textFieldConsole.setColumns(10);
 
 		JButton btnTest = new JButton("Connect");
 		btnTest.addActionListener(new ActionListener() {
@@ -209,9 +224,9 @@ public class MaindApp {
 					tabbedPaneSource.setEnabledAt(1, true);
 					tabbedPaneSource.setSelectedIndex(1);
 					panelDatabase.setEnabled(true);
-					textFieldConsole.setText("Conexão estável, favor selecionar um banco de dados.");
+					writeLog("[info] Conexão estável, favor selecionar um banco de dados.");
 				} catch (Exception s) {
-					textFieldConsole.setText("Error: banco não encontrado");
+					writeLog("[erro] Banco não encontrado");
 				}
 			}
 		});
@@ -242,7 +257,7 @@ public class MaindApp {
 								String.valueOf(textFieldPassword.getPassword()), listDb.getSelectedValue().toString());
 						tabbedPaneSource.setEnabledAt(2, true);
 						tabbedPaneSource.setSelectedIndex(2);
-							textFieldConsole.setText("Conexão estável com o banco de dados " + listDb.getSelectedValue().toString());
+							writeLog("[info] Conexão estável com o banco de dados " + listDb.getSelectedValue().toString());
 						}
 					}
 				});
@@ -279,7 +294,7 @@ public class MaindApp {
 					public void mouseClicked(MouseEvent arg0) {
 						try {
 							listColumns.setModel(listToListModel(postgresDb.listColumns(listTable.getSelectedValue().toString())));
-							textFieldConsole.setText("Selecione as colunas desejadas para Primary Key e Value");
+							writeLog("[action] Selecione as colunas desejadas para Primary Key e Value");
 							tabbedPaneSource.setEnabledAt(3, true);
 							tabbedPaneSource.setSelectedIndex(3);
 							tabbedPaneTarget.setEnabled(true);
@@ -304,7 +319,7 @@ public class MaindApp {
 				listTable.addListSelectionListener(new ListSelectionListener() {
 					
 					public void valueChanged(ListSelectionEvent e) {
-						textFieldConsole.setText("Selecionado tabela "+ listTable.getSelectedValue().toString());
+						writeLog("[info] Selecionada a tabela "+ listTable.getSelectedValue().toString());
 					}
 				});
 				
@@ -313,7 +328,7 @@ public class MaindApp {
 						public void focusGained(FocusEvent e) {
 							try {
 								listTable.setModel(listToListModel(postgresDb.listTables()));
-								textFieldConsole.setText("Selecione uma tabela");
+								writeLog("[action] Selecione uma tabela");
 								} catch (Exception t) {
 							}
 						}
@@ -339,11 +354,11 @@ public class MaindApp {
 				listColumns.addFocusListener(new FocusAdapter() {
 					@Override
 					public void focusGained(FocusEvent e) {
-						try {
-							listColumns.setModel(listToListModel(postgresDb.listColumns(listTable.getSelectedValue().toString())));
-							textFieldConsole.setText("Selecione as colunas desejadas para Primary Key e Value");
-						} catch (Exception z) {
-						}
+//						try {
+//							listColumns.setModel(listToListModel(postgresDb.listColumns(listTable.getSelectedValue().toString())));
+//							writeLog("Selecione as colunas desejadas para Primary Key e Value");
+//						} catch (Exception z) {
+//						}
 					}
 				});
 
@@ -404,7 +419,7 @@ public class MaindApp {
 					listPkTemp.addElement(n);
 				}
 				listPk.setModel(listPkTemp);
-				textFieldConsole.setText("Selecionado colunas "+ listPkTemp.toString() +" como Primary Keys");
+				writeLog("[info] Selecionadas a colunas "+ listPkTemp.toString() +" como Primary Keys");
 			}
 			
 		});
@@ -421,7 +436,7 @@ public class MaindApp {
 					listValueTemp.addElement(n);
 				}
 				listValue.setModel(listValueTemp);
-				textFieldConsole.setText("Selecionado colunas "+ listValueTemp.toString() +" como Values");
+				writeLog("[info] Selecionadas as colunas "+ listValueTemp.toString() +" como Values");
 			}
 		});
 		btnGetSelectedColumnsVALUE.setBounds(58, 259, 199, 25);
@@ -451,7 +466,7 @@ public class MaindApp {
 		labelRedis.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				textFieldConsole.setText("Forneça detalhes para conexão com Redis");
+				writeLog("[action] Forneça detalhes para conexão com Redis");
 			}
 		});
 		labelRedis.setFont(new Font("Dialog", Font.BOLD, 13));
@@ -495,9 +510,9 @@ public class MaindApp {
 				if (targetDb.connect(textFieldRedisHost.getText().toString(), textFieldRedisPort.getText(), textFieldTargetUser.getText(), textFieldRedisPassword.getText(), textFieldTargetDbName.getText())) {
 					btnImport.setEnabled(true);
 					textFieldImport.setEnabled(true);
-					textFieldConsole.setText("Conexão estável com "+targetDb.toString());
+					writeLog("[info] Conexão estável com "+targetDb.toString());
 				}else {
-					textFieldConsole.setText("Conexão com "+targetDb.toString()+" falhou!");
+					writeLog("[erro] Conexão com "+targetDb.toString()+" falhou!");
 				}
 			}			
 		});
@@ -598,7 +613,7 @@ public class MaindApp {
 				textFieldImport.setText("SELECT '" + textFieldPrefixo.getText() + "_'||" + tempPk
 						+ ", (SELECT row_to_json(_) FROM (SELECT " + tempValue + ") AS _ ) AS VALUE FROM "
 						+ listTable.getSelectedValue().toString());
-				textFieldConsole.setText("Gerado comando SQL para importação de dados");
+				writeLog("[info] Gerado comando SQL para importação de dados");
 			}		
 		});
 
@@ -607,7 +622,7 @@ public class MaindApp {
 
 		JButton btnCancel = new JButton("Cancel");
 		btnCancel.setEnabled(false);
-		btnCancel.setBounds(472, 458, 117, 25);
+		btnCancel.setBounds(477, 394, 117, 25);
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
@@ -617,23 +632,28 @@ public class MaindApp {
 		
 		
 		
-		JLabel lblConsole = new JLabel("Console:");
-		lblConsole.setBounds(12, 439, 70, 15);
+		JLabel lblConsole = new JLabel("LOGs");
+		lblConsole.setBounds(285, 482, 40, 15);
 		mainPanel.add(lblConsole);
 		
 				btnImport = new JButton("Import");
 				btnImport.setEnabled(false);
-				btnImport.setBounds(472, 395, 117, 25);
+				btnImport.setBounds(477, 357, 117, 25);
 				mainPanel.add(btnImport);
+				
+				JProgressBar progressBar = new JProgressBar();
+				progressBar.setBounds(12, 444, 617, 26);
+				mainPanel.add(progressBar);
 				btnImport.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						 try {
+						 writeLog("[info] Iniciando a importação para o "+targetDb.toString());
 						 postgresDb.exportRelationalDataToNoSQL(textFieldImport.getText().toString(), targetDb, listTable.getSelectedValue().toString());
-						 textFieldConsole.setText("Importado dados para Redis com sucesso");
+						 writeLog("[info] Dados importados com sucesso");
 						 } catch (SQLException e1) {
-							 textFieldConsole.setText("Error SQL Exception");
+							 writeLog("[erro] Error SQL Exception");
 						 } catch (JedisConnectionException e2) {
-							 textFieldConsole.setText("Favor inserir um host valido para banco Redis");
+							 writeLog("[erro] Favor inserir um host valido para banco Redis");
 						 }
 						 
 					}

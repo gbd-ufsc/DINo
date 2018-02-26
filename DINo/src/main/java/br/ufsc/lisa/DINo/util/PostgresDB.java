@@ -3,11 +3,15 @@ package br.ufsc.lisa.DINo.util;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import redis.clients.jedis.Jedis;
 
@@ -17,6 +21,10 @@ public class PostgresDB implements RelationalDB {
 	private Connection con = null;
 	private String url;
 	private RedisConnector redisDb;
+	
+	public Connection getConnection() {
+		return this.con;
+	}
 	
 	public String getUrl() {
 		return url;
@@ -140,7 +148,8 @@ public void exportRelationalDataToNoSQLP(String cmdSql, Connector host, String t
 		}
 		result.close();
 		
-		int cores = Runtime.getRuntime().availableProcessors();
+//		int cores = Runtime.getRuntime().availableProcessors()>1? Runtime.getRuntime().availableProcessors()-1: 1;
+		int cores = 2;
 		
 		long registrosCore = total/cores+1;
 		
@@ -157,6 +166,8 @@ public void exportRelationalDataToNoSQLP(String cmdSql, Connector host, String t
 			}));
 		}
 		
+		long timeB =  System.currentTimeMillis();
+		
 		for(Thread t : threads)
 			t.start();
 		
@@ -167,29 +178,36 @@ public void exportRelationalDataToNoSQLP(String cmdSql, Connector host, String t
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		long timeE =  System.currentTimeMillis()-timeB;
+		
+		System.out.println("Elapsed time: "+ TimeFormatter.formatTime(timeE));
 		
 	}
 
 private void exportRecords(String query,Connector host) throws SQLException {
-	Statement pstmt = con.createStatement();
-	ResultSet result = pstmt.executeQuery(query);
+//	Statement pstmt = con.createStatement();
+//	ResultSet result = pstmt.executeQuery(query);
 	if (host instanceof RedisConnector) {
 		RedisConnector rc = (RedisConnector) host;
-		Jedis jedis = rc.pool.getResource();
-		while (result.next()) {
-			String key =  result.getString("?column?");
-			String value =  result.getString("value");
-			jedis.set(key, value);
-			System.out.println("Chave: " + key);
-		}
-	} else {
-		while (result.next()) {
-			String key =  result.getString("?column?");
-			String value =  result.getString("value");
-			host.put(key, value);
-			System.out.println("Chave: " + key);
-		}
+		((RedisConnector) host).importData(this, query);
+////		Jedis jedis = rc.pool.getResource();
+//		int i = 0;
+//		while (result.next()) {
+//			String key =  result.getString("?column?");
+//			String value =  result.getString("value");
+//			host.put(key, value);
+//			System.out.println("i: "+ ++i);
+//		}
+//		System.out.println(" --> " + i);
 	}
+		//	} else {
+//		while (result.next()) {
+//			String key =  result.getString("?column?");
+//			String value =  result.getString("value");
+//			host.put(key, value);
+//			System.out.println("Chave: " + key);
+//		}
+//	}
 	
 }
 	
