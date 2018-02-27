@@ -4,10 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
-import com.mongodb.util.JSON;
-
+import br.ufsc.lisa.DINo.views.MaindApp;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -92,11 +89,42 @@ public class RedisConnector implements Connector {
 
 		return true;
 	}
+	
+	public boolean importData(RelationalDB source, String query, MaindApp app, long block) {
+		Statement pstmt;
+		double progress =  (double) 256/block;
+		try {
+			pstmt = ((PostgresDB) source).getConnection().createStatement();
+			ResultSet result = pstmt.executeQuery(query);
+			Jedis jedis = pool.getResource();
+			if (password!= null && !password.isEmpty())
+				jedis.auth(this.password);
+			int i = 0, l = 0;
+			Transaction t = jedis.multi();
+			while (result.next()) {
+				String key = result.getString("?column?");
+				String value = result.getString("value");
+				t.set(key, value);
+				if (++i % 256 == 0) {
+					System.out.println("Lote: " + ++l);
+					app.updateProgressBar(progress);
+					t.exec();
+					t = jedis.multi();
+				}
+			}
+			System.out.println("Lote: " + ++l);
+			t.exec();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
 
 	@Override
 	public void close() {
 		this.pool.close();
-		;
 	}
 
 	@Override

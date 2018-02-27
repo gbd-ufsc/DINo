@@ -1,61 +1,46 @@
 package br.ufsc.lisa.DINo.views;
 
-import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
 import java.awt.BorderLayout;
-import javax.swing.JComboBox;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
-import java.awt.Font;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.ListModel;
+import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.text.DefaultCaret;
 
-import java.awt.FlowLayout;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JTextArea;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JCheckBox;
-import java.awt.SystemColor;
-import java.awt.Color;
-
+import br.ufsc.lisa.DINo.presenter.Importer;
 import br.ufsc.lisa.DINo.util.CassadraConnector;
 import br.ufsc.lisa.DINo.util.Connector;
 import br.ufsc.lisa.DINo.util.MongoConnector;
 import br.ufsc.lisa.DINo.util.PostgresDB;
 import br.ufsc.lisa.DINo.util.RedisConnector;
 import redis.clients.jedis.exceptions.JedisConnectionException;
-
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.InputMethodListener;
-import java.awt.event.InputMethodEvent;
-import javax.swing.JScrollBar;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import javax.swing.JFormattedTextField;
-import javax.swing.JPasswordField;
-import javax.swing.JProgressBar;
-import javax.swing.JTextPane;
 
 public class MaindApp {
 
@@ -79,17 +64,18 @@ public class MaindApp {
 	private JTabbedPane tabbedPaneTarget;
 	private JButton btnGenerateSql;
 	private JButton btnGetSelectedColumnsPK;
-	private JList listValue; 
+	private JList listValue;
 	private JList listPk;
 	private JButton btnGetSelectedColumnsVALUE;
 	private JButton btnImport;
 	private JComboBox<Connector> comboBoxTargets;
 	private JTextField textFieldTargetUser;
 	private JTextField textFieldTargetDbName;
+	private JProgressBar progressBar;
+	private MaindApp app;
+	private Double progressValue;
 
-	
-
-	public DefaultListModel<String> listToListModel (List<String> itens){
+	public DefaultListModel<String> listToListModel(List<String> itens) {
 		DefaultListModel<String> newList = new DefaultListModel<String>();
 		itens.forEach(item -> {
 			newList.addElement(item);
@@ -112,20 +98,42 @@ public class MaindApp {
 			}
 		});
 	}
-	
+
 	public void writeLog(String message) {
 		SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("HH:mm:ss");
-		this.textFieldConsole.setText(this.textFieldConsole.getText()+
-				simpleTimeFormat.format(new Date())+"\t"+
-				message +
-				"\n"
-			);
+		this.textFieldConsole
+				.setText(this.textFieldConsole.getText() + simpleTimeFormat.format(new Date()) + "\t" + message + "\n");
+		
+	}
+	
+	public void importBloqued(boolean value) {
+		this.btnImport.setEnabled(!value);
+	}
+
+	public void updateProgressBar(Double value) {
+		progressBar.setStringPainted(true);
+		if (value < 0) {
+			this.progressBar.setValue(100);
+			progressBar.setString("100 %");
+		} else if (value.equals(0)) {
+			this.progressBar.setValue(0);
+			progressBar.setString("0 %");
+		} else {
+			this.progressValue += value / 2;
+			if (this.progressValue > 0) {
+				Double newValue = this.progressValue * 100;
+				this.progressBar.setValue(newValue.intValue());
+				progressBar.setString(String.format("%.2f", newValue) + " %");
+			}
+		}
+		this.progressBar.repaint();
 	}
 
 	public MaindApp() throws ClassNotFoundException, SQLException {
 		initialize();
 		postgresDb = null;
 		targetDb = null;
+		this.app = this;
 	}
 
 	private void initialize() throws ClassNotFoundException, SQLException {
@@ -133,7 +141,7 @@ public class MaindApp {
 		frame.setBounds(100, 100, 660, 654);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
-		
+
 		panelDatabase = new JPanel();
 		listColumns = new JList();
 		tabbedPaneTarget = new JTabbedPane(JTabbedPane.TOP);
@@ -204,14 +212,17 @@ public class MaindApp {
 		textFieldPassword.setBounds(102, 139, 163, 19);
 		panelServer.add(textFieldPassword);
 		textFieldPassword.setColumns(10);
-		
+
 		JScrollPane scrollPane_5 = new JScrollPane();
 		scrollPane_5.setBounds(12, 501, 617, 116);
 		mainPanel.add(scrollPane_5);
-		
+
 		textFieldConsole = new JTextPane();
 		scrollPane_5.setViewportView(textFieldConsole);
+		DefaultCaret caret = (DefaultCaret) textFieldConsole.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.UPDATE_WHEN_ON_EDT);
 		textFieldConsole.setEditable(false);
+		
 
 		JButton btnTest = new JButton("Connect");
 		btnTest.addActionListener(new ActionListener() {
@@ -233,37 +244,36 @@ public class MaindApp {
 		btnTest.setBounds(22, 166, 243, 25);
 		panelServer.add(btnTest);
 
-		
 		tabbedPaneSource.addTab("Database", null, panelDatabase, null);
 		tabbedPaneSource.setEnabledAt(1, false);
-		
+
 		panelDatabase.setLayout(null);
-		
+
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(23, 39, 239, 234);
 		panelDatabase.add(scrollPane);
-		
-				// JScrollBar scrollBar = new JScrollBar();
-				// scrollBar.setBounds(204, 38, 17, 146);
-				// panelDatabase.add(scrollBar);
-		
-				listDb = new JList();
-				scrollPane.setViewportView(listDb);
-				listDb.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						if (listDb.getSelectedValue() != null) {
-						postgresDb.connect(textFieldHost.getText(), textFieldPort.getText(), textFieldUsername.getText(),
-								String.valueOf(textFieldPassword.getPassword()), listDb.getSelectedValue().toString());
-						tabbedPaneSource.setEnabledAt(2, true);
-						tabbedPaneSource.setSelectedIndex(2);
-							writeLog("[info] Conexão estável com o banco de dados " + listDb.getSelectedValue().toString());
-						}
-					}
-				});
+
+		// JScrollBar scrollBar = new JScrollBar();
+		// scrollBar.setBounds(204, 38, 17, 146);
+		// panelDatabase.add(scrollBar);
+
+		listDb = new JList();
+		scrollPane.setViewportView(listDb);
+		listDb.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (listDb.getSelectedValue() != null) {
+					postgresDb.connect(textFieldHost.getText(), textFieldPort.getText(), textFieldUsername.getText(),
+							String.valueOf(textFieldPassword.getPassword()), listDb.getSelectedValue().toString());
+					tabbedPaneSource.setEnabledAt(2, true);
+					tabbedPaneSource.setSelectedIndex(2);
+					writeLog("[info] Conexão estável com o banco de dados " + listDb.getSelectedValue().toString());
+				}
+			}
+		});
 		listDb.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listDb.setVisibleRowCount(6);
-        listDb.setLayoutOrientation(JList.VERTICAL);
+		listDb.setLayoutOrientation(JList.VERTICAL);
 
 		JLabel lblSelectDb = new JLabel("Select a database");
 		lblSelectDb.setBounds(74, 12, 129, 15);
@@ -283,58 +293,59 @@ public class MaindApp {
 		} catch (Exception n) {
 
 		}
-		
+
 		JScrollPane scrollPane_1 = new JScrollPane();
 		scrollPane_1.setBounds(24, 29, 252, 241);
 		panelTables.add(scrollPane_1);
-		
-				final JList listTable = new JList();
-				listTable.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-						try {
-							listColumns.setModel(listToListModel(postgresDb.listColumns(listTable.getSelectedValue().toString())));
-							writeLog("[action] Selecione as colunas desejadas para Primary Key e Value");
-							tabbedPaneSource.setEnabledAt(3, true);
-							tabbedPaneSource.setSelectedIndex(3);
-							tabbedPaneTarget.setEnabled(true);
-							textFieldPrefixo.setEnabled(true);
-							listPk.setEnabled(true);
-							btnGetSelectedColumnsPK.setEnabled(true);
-							listValue.setEnabled(true);
-							btnGetSelectedColumnsVALUE.setEnabled(true);
-							btnGenerateSql.setEnabled(true);
-							
-						} catch (SQLException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (ClassNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-					}
-				});
-				scrollPane_1.setViewportView(listTable);
-				listTable.addListSelectionListener(new ListSelectionListener() {
-					
-					public void valueChanged(ListSelectionEvent e) {
-						writeLog("[info] Selecionada a tabela "+ listTable.getSelectedValue().toString());
-					}
-				});
-				
-					listTable.addFocusListener(new FocusAdapter() {
-						@Override
-						public void focusGained(FocusEvent e) {
-							try {
-								listTable.setModel(listToListModel(postgresDb.listTables()));
-								writeLog("[action] Selecione uma tabela");
-								} catch (Exception t) {
-							}
-						}
-					});
-					listTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-				//	listTable.setModel(postgresDb.listTables());
+
+		final JList listTable = new JList();
+		listTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				try {
+					listColumns
+							.setModel(listToListModel(postgresDb.listColumns(listTable.getSelectedValue().toString())));
+					writeLog("[action] Selecione as colunas desejadas para Primary Key e Value");
+					tabbedPaneSource.setEnabledAt(3, true);
+					tabbedPaneSource.setSelectedIndex(3);
+					tabbedPaneTarget.setEnabled(true);
+					textFieldPrefixo.setEnabled(true);
+					listPk.setEnabled(true);
+					btnGetSelectedColumnsPK.setEnabled(true);
+					listValue.setEnabled(true);
+					btnGetSelectedColumnsVALUE.setEnabled(true);
+					btnGenerateSql.setEnabled(true);
+
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		});
+		scrollPane_1.setViewportView(listTable);
+		listTable.addListSelectionListener(new ListSelectionListener() {
+
+			public void valueChanged(ListSelectionEvent e) {
+				writeLog("[info] Selecionada a tabela " + listTable.getSelectedValue().toString());
+			}
+		});
+
+		listTable.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				try {
+					listTable.setModel(listToListModel(postgresDb.listTables()));
+					writeLog("[action] Selecione uma tabela");
+				} catch (Exception t) {
+				}
+			}
+		});
+		listTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		// listTable.setModel(postgresDb.listTables());
 
 		JPanel panelColumns = new JPanel();
 		tabbedPaneSource.addTab("Columns", null, panelColumns, null);
@@ -345,29 +356,28 @@ public class MaindApp {
 		lblColumn.setBounds(114, 5, 79, 17);
 		panelColumns.add(lblColumn);
 		lblColumn.setFont(new Font("Dialog", Font.BOLD, 14));
-		
+
 		JScrollPane scrollPane_2 = new JScrollPane();
 		scrollPane_2.setBounds(25, 21, 251, 242);
 		panelColumns.add(scrollPane_2);
-		
-				scrollPane_2.setViewportView(listColumns);
-				listColumns.addFocusListener(new FocusAdapter() {
-					@Override
-					public void focusGained(FocusEvent e) {
-//						try {
-//							listColumns.setModel(listToListModel(postgresDb.listColumns(listTable.getSelectedValue().toString())));
-//							writeLog("Selecione as colunas desejadas para Primary Key e Value");
-//						} catch (Exception z) {
-//						}
-					}
-				});
+
+		scrollPane_2.setViewportView(listColumns);
+		listColumns.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				// try {
+				// listColumns.setModel(listToListModel(postgresDb.listColumns(listTable.getSelectedValue().toString())));
+				// writeLog("Selecione as colunas desejadas para Primary Key e Value");
+				// } catch (Exception z) {
+				// }
+			}
+		});
 
 		JLabel lblTables = new JLabel("Target");
 		lblTables.setBounds(484, -3, 78, 21);
 		lblTables.setFont(new Font("Dialog", Font.BOLD, 14));
 		mainPanel.add(lblTables);
 
-		
 		tabbedPaneTarget.setEnabled(false);
 		tabbedPaneTarget.setBounds(348, 22, 293, 323);
 		mainPanel.add(tabbedPaneTarget);
@@ -381,7 +391,7 @@ public class MaindApp {
 		lblProperties.setFont(new Font("Dialog", Font.BOLD, 12));
 		lblProperties.setBounds(12, 9, 103, 26);
 		panelCollection.add(lblProperties);
-		
+
 		JScrollPane scrollPane_3 = new JScrollPane();
 		scrollPane_3.setBounds(58, 36, 199, 90);
 		panelCollection.add(scrollPane_3);
@@ -394,7 +404,7 @@ public class MaindApp {
 		JLabel lblPk = new JLabel("PK");
 		lblPk.setBounds(12, 37, 28, 15);
 		panelCollection.add(lblPk);
-		
+
 		JScrollPane scrollPane_4 = new JScrollPane();
 		scrollPane_4.setBounds(58, 166, 199, 82);
 		panelCollection.add(scrollPane_4);
@@ -419,14 +429,14 @@ public class MaindApp {
 					listPkTemp.addElement(n);
 				}
 				listPk.setModel(listPkTemp);
-				writeLog("[info] Selecionadas a colunas "+ listPkTemp.toString() +" como Primary Keys");
+				writeLog("[info] Selecionadas a colunas " + listPkTemp.toString() + " como Primary Keys");
 			}
-			
+
 		});
 		btnGetSelectedColumnsPK.setBounds(58, 134, 199, 25);
 		panelCollection.add(btnGetSelectedColumnsPK);
 
-		 btnGetSelectedColumnsVALUE = new JButton("Get selected row");
+		btnGetSelectedColumnsVALUE = new JButton("Get selected row");
 		btnGetSelectedColumnsVALUE.setEnabled(false);
 		btnGetSelectedColumnsVALUE.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -436,7 +446,7 @@ public class MaindApp {
 					listValueTemp.addElement(n);
 				}
 				listValue.setModel(listValueTemp);
-				writeLog("[info] Selecionadas as colunas "+ listValueTemp.toString() +" como Values");
+				writeLog("[info] Selecionadas as colunas " + listValueTemp.toString() + " como Values");
 			}
 		});
 		btnGetSelectedColumnsVALUE.setBounds(58, 259, 199, 25);
@@ -447,7 +457,7 @@ public class MaindApp {
 		textFieldPrefixo.setBounds(111, 9, 144, 26);
 		panelCollection.add(textFieldPrefixo);
 		textFieldPrefixo.setColumns(10);
-		
+
 		JPanel panelTargetNoSQL = new JPanel();
 		panelTargetNoSQL.addComponentListener(new ComponentAdapter() {
 			@Override
@@ -461,7 +471,7 @@ public class MaindApp {
 		panelTargetNoSQL.setLayout(null);
 		tabbedPaneTarget.addTab("NoSQL DB", null, panelTargetNoSQL, null);
 		tabbedPaneTarget.setEnabledAt(1, true);
-		
+
 		JLabel labelRedis = new JLabel("NoSQL");
 		labelRedis.addFocusListener(new FocusAdapter() {
 			@Override
@@ -472,72 +482,74 @@ public class MaindApp {
 		labelRedis.setFont(new Font("Dialog", Font.BOLD, 13));
 		labelRedis.setBounds(12, 12, 101, 15);
 		panelTargetNoSQL.add(labelRedis);
-		
+
 		JLabel labelRedisHost = new JLabel("Host: ");
 		labelRedisHost.setBounds(12, 58, 50, 15);
 		panelTargetNoSQL.add(labelRedisHost);
-		
+
 		JLabel labelRedisPort = new JLabel("Port: ");
 		labelRedisPort.setBounds(12, 85, 70, 15);
 		panelTargetNoSQL.add(labelRedisPort);
-		
+
 		JLabel labelRedisPassword = new JLabel("Password: ");
 		labelRedisPassword.setBounds(12, 117, 101, 15);
 		panelTargetNoSQL.add(labelRedisPassword);
-		
+
 		textFieldRedisHost = new JTextField();
 		textFieldRedisHost.setText("localhost");
 		textFieldRedisHost.setColumns(10);
 		textFieldRedisHost.setBounds(92, 56, 163, 19);
 		panelTargetNoSQL.add(textFieldRedisHost);
-		
+
 		textFieldRedisPort = new JTextField();
 		textFieldRedisPort.setText("6379");
 		textFieldRedisPort.setColumns(10);
 		textFieldRedisPort.setBounds(92, 83, 163, 19);
 		panelTargetNoSQL.add(textFieldRedisPort);
-		
+
 		textFieldRedisPassword = new JTextField();
 		textFieldRedisPassword.setColumns(10);
 		textFieldRedisPassword.setBounds(92, 117, 163, 19);
 		panelTargetNoSQL.add(textFieldRedisPassword);
-		
+
 		JButton buttonRedisConnect = new JButton("Connect");
 		buttonRedisConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				targetDb = (Connector) comboBoxTargets.getSelectedItem();
-				
-				if (targetDb.connect(textFieldRedisHost.getText().toString(), textFieldRedisPort.getText(), textFieldTargetUser.getText(), textFieldRedisPassword.getText(), textFieldTargetDbName.getText())) {
+
+				if (targetDb.connect(textFieldRedisHost.getText().toString(), textFieldRedisPort.getText(),
+						textFieldTargetUser.getText(), textFieldRedisPassword.getText(),
+						textFieldTargetDbName.getText())) {
 					btnImport.setEnabled(true);
 					textFieldImport.setEnabled(true);
-					writeLog("[info] Conexão estável com "+targetDb.toString());
-				}else {
-					writeLog("[erro] Conexão com "+targetDb.toString()+" falhou!");
+					writeLog("[info] Conexão estável com " + targetDb.toString());
+				} else {
+					writeLog("[erro] Conexão com " + targetDb.toString() + " falhou!");
 				}
-			}			
+			}
 		});
-		
+
 		buttonRedisConnect.setBounds(12, 251, 243, 25);
 		panelTargetNoSQL.add(buttonRedisConnect);
-		
+
 		comboBoxTargets = new JComboBox();
 		comboBoxTargets.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (comboBoxTargets.getItemCount()>0) {
+				if (comboBoxTargets.getItemCount() > 0) {
 					if (comboBoxTargets.getSelectedItem() instanceof MongoConnector) {
 						textFieldRedisHost.setEnabled(true);
 						textFieldRedisPort.setEnabled(true);
 						textFieldRedisPassword.setEnabled(true);
 						textFieldTargetDbName.setEnabled(true);
 						textFieldTargetUser.setEnabled(true);
-					}else if (comboBoxTargets.getSelectedItem() instanceof RedisConnector) {
+					} else if (comboBoxTargets.getSelectedItem() instanceof RedisConnector) {
 						textFieldRedisHost.setEnabled(true);
 						textFieldRedisPort.setEnabled(true);
 						textFieldRedisPassword.setEnabled(true);
 						textFieldTargetDbName.setEnabled(false);
 						textFieldTargetUser.setEnabled(false);
-					} 
-				}else {
+					}
+				} else {
 					textFieldRedisHost.setEnabled(false);
 					textFieldRedisPort.setEnabled(false);
 					textFieldRedisPassword.setEnabled(false);
@@ -548,20 +560,20 @@ public class MaindApp {
 		});
 		comboBoxTargets.setBounds(72, 7, 183, 24);
 		panelTargetNoSQL.add(comboBoxTargets);
-		
+
 		JLabel lblDbName = new JLabel("User");
 		lblDbName.setBounds(12, 151, 101, 15);
 		panelTargetNoSQL.add(lblDbName);
-		
+
 		textFieldTargetUser = new JTextField();
 		textFieldTargetUser.setColumns(10);
 		textFieldTargetUser.setBounds(92, 151, 163, 19);
 		panelTargetNoSQL.add(textFieldTargetUser);
-		
+
 		JLabel label = new JLabel("DB name");
 		label.setBounds(12, 186, 101, 15);
 		panelTargetNoSQL.add(label);
-		
+
 		textFieldTargetDbName = new JTextField();
 		textFieldTargetDbName.setColumns(10);
 		textFieldTargetDbName.setBounds(92, 186, 163, 19);
@@ -614,7 +626,7 @@ public class MaindApp {
 						+ ", (SELECT row_to_json(_) FROM (SELECT " + tempValue + ") AS _ ) AS VALUE FROM "
 						+ listTable.getSelectedValue().toString());
 				writeLog("[info] Gerado comando SQL para importação de dados");
-			}		
+			}
 		});
 
 		btnGenerateSql.setBounds(185, 7, 126, 25);
@@ -629,34 +641,35 @@ public class MaindApp {
 			}
 		});
 		mainPanel.add(btnCancel);
-		
-		
-		
+
 		JLabel lblConsole = new JLabel("LOGs");
 		lblConsole.setBounds(285, 482, 40, 15);
 		mainPanel.add(lblConsole);
-		
-				btnImport = new JButton("Import");
-				btnImport.setEnabled(false);
-				btnImport.setBounds(477, 357, 117, 25);
-				mainPanel.add(btnImport);
-				
-				JProgressBar progressBar = new JProgressBar();
-				progressBar.setBounds(12, 444, 617, 26);
-				mainPanel.add(progressBar);
-				btnImport.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						 try {
-						 writeLog("[info] Iniciando a importação para o "+targetDb.toString());
-						 postgresDb.exportRelationalDataToNoSQL(textFieldImport.getText().toString(), targetDb, listTable.getSelectedValue().toString());
-						 writeLog("[info] Dados importados com sucesso");
-						 } catch (SQLException e1) {
-							 writeLog("[erro] Error SQL Exception");
-						 } catch (JedisConnectionException e2) {
-							 writeLog("[erro] Favor inserir um host valido para banco Redis");
-						 }
-						 
-					}
-				});
+
+		btnImport = new JButton("Import");
+		btnImport.setEnabled(false);
+		btnImport.setBounds(477, 357, 117, 25);
+		mainPanel.add(btnImport);
+
+		progressBar = new JProgressBar();
+		progressBar.setBounds(12, 444, 617, 26);
+		mainPanel.add(progressBar);
+		btnImport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					progressValue = 0.;
+					updateProgressBar(0.);
+					importBloqued(true);
+					writeLog("[info] Iniciando a importação para o " + targetDb.toString());
+					Importer impo = new Importer(postgresDb, targetDb);
+					impo.importData(textFieldImport.getText().toString(), listTable.getSelectedValue().toString(), app);
+				} catch (SQLException e1) {
+					writeLog("[erro] Error SQL Exception");
+				} catch (JedisConnectionException e2) {
+					writeLog("[erro] Favor inserir um host valido para banco Redis");
+				}
+
+			}
+		});
 	}
 }

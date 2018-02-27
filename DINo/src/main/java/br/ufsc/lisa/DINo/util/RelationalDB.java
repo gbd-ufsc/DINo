@@ -13,8 +13,6 @@ public interface RelationalDB {
 	public List<String> listTables() throws ClassNotFoundException, SQLException;
 	public List<String> listColumns(String tableName) throws ClassNotFoundException, SQLException; 
 	
-	public void exportRelationalDataToNoSQL(String cmdSql, Connector host, String table) throws SQLException;
-	
 	
 }
 

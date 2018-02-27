@@ -21,8 +21,17 @@ public class Importer{
 	private long timeB, timeE;
 	private ArrayList<Thread> threads = new ArrayList<>();
 	
+	
+	
+	public Importer(RelationalDB rDB, Connector nRDB) {
+		super();
+		this.rDB = rDB;
+		this.nRDB = nRDB;
+	}
+
 	public void importData(String sql,String table, MaindApp app) throws SQLException {
-		Statement pstmt = ((PostgresDB) nRDB).getConnection().createStatement();
+		Statement pstmt = ((PostgresDB) rDB).getConnection().createStatement();
+		this.app = app;
 		
 		ResultSet result = pstmt.executeQuery("SELECT COUNT(*) as total FROM "+ table);
 		int total=0;
@@ -46,48 +55,44 @@ public class Importer{
 			final String query = sql+" limit "+(registrosCore) + " offset "+registrosCore*i;
 			threads.add(new Thread(()->{
 				try {
-					this.exportRecords(query,nRDB);
+					this.exportRecords(query,nRDB,registrosCore);
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
 			}));
 		}
 		
+		Thread w = new Thread(()->{
+				this.watcher(threads);
+		});
+		
 		timeB =  System.currentTimeMillis();
 		
 		for(Thread t : threads)
 			t.start();
-		
-		for(Thread t : threads)
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
+		w.start();
 		
 	}
 
-	private void exportRecords(String query,Connector host) throws SQLException {
-//		Statement pstmt = con.createStatement();
-//		ResultSet result = pstmt.executeQuery(query);
+	private void exportRecords(String query,Connector host, long block) throws SQLException {
 		if (host instanceof RedisConnector) {
 			RedisConnector rc = (RedisConnector) host;
-			((RedisConnector) host).importData(rDB, query);
+			((RedisConnector) host).importData(rDB, query, this.app, block);
 		}
 		
 	}
 	
-	private void watcher() {
+	private void watcher(ArrayList<Thread> threads) {
 		for(Thread t : threads)
 			try {
 				t.join();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				app.writeLog("[erro] Problema com as Threads de importação, os dados devem estar inconsistentes");
 			}
 		app.writeLog("[info] Importação concluida");
-		app.writeLog("[info] Tempo de importação: "+ TimeFormatter.formatTime(System.currentTimeMillis()-timeB));
+ 		app.writeLog("[info] Tempo de importação: "+ TimeFormatter.formatTime(System.currentTimeMillis()-timeB));
+		app.updateProgressBar(-1.);
+		app.importBloqued(false);
 	}
 }
