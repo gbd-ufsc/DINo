@@ -1,5 +1,7 @@
 package br.ufsc.lisa.DINo.util;
 
+import br.ufsc.lisa.DINo.views.MaindApp;
+
 public class CassadraConnector implements Connector {
 
 	@Override
@@ -24,6 +26,12 @@ public class CassadraConnector implements Connector {
 	public String toString() {
 		// TODO Auto-generated method stub
 		return "Cassandra";
+	}
+
+	@Override
+	public boolean importData(RelationalDB source, String query, MaindApp app, long block) {
+		app.writeLog("Feito fera!");
+		return false;
 	}
 	
 	

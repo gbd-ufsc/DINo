@@ -75,11 +75,7 @@ public class Importer{
 	}
 
 	private void exportRecords(String query,Connector host, long block) throws SQLException {
-		if (host instanceof RedisConnector) {
-			RedisConnector rc = (RedisConnector) host;
-			((RedisConnector) host).importData(rDB, query, this.app, block);
-		}
-		
+		host.importData(rDB, query, this.app, block);
 	}
 	
 	private void watcher(ArrayList<Thread> threads) {

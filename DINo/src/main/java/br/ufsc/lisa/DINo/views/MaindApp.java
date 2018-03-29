@@ -56,9 +56,9 @@ public class MaindApp {
 	private String tempUrl;
 	private JTextField textFieldPrefixo;
 	private JTextPane textFieldConsole;
-	private JTextField textFieldRedisHost;
-	private JTextField textFieldRedisPort;
-	private JTextField textFieldRedisPassword;
+	private JTextField textFieldTargetHost;
+	private JTextField textFieldTargetPort;
+	private JTextField textFieldTargetPassword;
 	private JPanel panelDatabase;
 	private JList listColumns;
 	private JTabbedPane tabbedPaneTarget;
@@ -66,6 +66,7 @@ public class MaindApp {
 	private JButton btnGetSelectedColumnsPK;
 	private JList listValue;
 	private JList listPk;
+	private JList listTable;
 	private JButton btnGetSelectedColumnsVALUE;
 	private JButton btnImport;
 	private JComboBox<Connector> comboBoxTargets;
@@ -104,6 +105,10 @@ public class MaindApp {
 		this.textFieldConsole
 				.setText(this.textFieldConsole.getText() + simpleTimeFormat.format(new Date()) + "\t" + message + "\n");
 		
+	}
+	
+	public String exportedTableName() {
+		return (String) this.listTable.getSelectedValue();
 	}
 	
 	public void importBloqued(boolean value) {
@@ -298,7 +303,7 @@ public class MaindApp {
 		scrollPane_1.setBounds(24, 29, 252, 241);
 		panelTables.add(scrollPane_1);
 
-		final JList listTable = new JList();
+		listTable = new JList();
 		listTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -495,30 +500,30 @@ public class MaindApp {
 		labelRedisPassword.setBounds(12, 117, 101, 15);
 		panelTargetNoSQL.add(labelRedisPassword);
 
-		textFieldRedisHost = new JTextField();
-		textFieldRedisHost.setText("localhost");
-		textFieldRedisHost.setColumns(10);
-		textFieldRedisHost.setBounds(92, 56, 163, 19);
-		panelTargetNoSQL.add(textFieldRedisHost);
+		textFieldTargetHost = new JTextField();
+		textFieldTargetHost.setText("localhost");
+		textFieldTargetHost.setColumns(10);
+		textFieldTargetHost.setBounds(92, 56, 163, 19);
+		panelTargetNoSQL.add(textFieldTargetHost);
 
-		textFieldRedisPort = new JTextField();
-		textFieldRedisPort.setText("6379");
-		textFieldRedisPort.setColumns(10);
-		textFieldRedisPort.setBounds(92, 83, 163, 19);
-		panelTargetNoSQL.add(textFieldRedisPort);
+		textFieldTargetPort = new JTextField();
+		textFieldTargetPort.setText("6379");
+		textFieldTargetPort.setColumns(10);
+		textFieldTargetPort.setBounds(92, 83, 163, 19);
+		panelTargetNoSQL.add(textFieldTargetPort);
 
-		textFieldRedisPassword = new JTextField();
-		textFieldRedisPassword.setColumns(10);
-		textFieldRedisPassword.setBounds(92, 117, 163, 19);
-		panelTargetNoSQL.add(textFieldRedisPassword);
+		textFieldTargetPassword = new JTextField();
+		textFieldTargetPassword.setColumns(10);
+		textFieldTargetPassword.setBounds(92, 117, 163, 19);
+		panelTargetNoSQL.add(textFieldTargetPassword);
 
 		JButton buttonRedisConnect = new JButton("Connect");
 		buttonRedisConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				targetDb = (Connector) comboBoxTargets.getSelectedItem();
 
-				if (targetDb.connect(textFieldRedisHost.getText().toString(), textFieldRedisPort.getText(),
-						textFieldTargetUser.getText(), textFieldRedisPassword.getText(),
+				if (targetDb.connect(textFieldTargetHost.getText().toString(), textFieldTargetPort.getText(),
+						textFieldTargetUser.getText(), textFieldTargetPassword.getText(),
 						textFieldTargetDbName.getText())) {
 					btnImport.setEnabled(true);
 					textFieldImport.setEnabled(true);
@@ -535,24 +540,55 @@ public class MaindApp {
 		comboBoxTargets = new JComboBox();
 		comboBoxTargets.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				textFieldTargetHost.setText("");
+				textFieldTargetPort.setText("");
+				textFieldTargetPassword.setText("");
+				textFieldTargetDbName.setText("");
+				textFieldTargetUser.setText("");
+				
 				if (comboBoxTargets.getItemCount() > 0) {
 					if (comboBoxTargets.getSelectedItem() instanceof MongoConnector) {
-						textFieldRedisHost.setEnabled(true);
-						textFieldRedisPort.setEnabled(true);
-						textFieldRedisPassword.setEnabled(true);
+						textFieldTargetHost.setEnabled(true);
+						textFieldTargetPort.setEnabled(true);
+						textFieldTargetPassword.setEnabled(true);
 						textFieldTargetDbName.setEnabled(true);
 						textFieldTargetUser.setEnabled(true);
+						
+						textFieldTargetHost.setText("127.0.0.1");
+						textFieldTargetPort.setText("27017");
+						textFieldTargetPassword.setText("");
+						textFieldTargetDbName.setText("test");
+						textFieldTargetUser.setText("");
+						
 					} else if (comboBoxTargets.getSelectedItem() instanceof RedisConnector) {
-						textFieldRedisHost.setEnabled(true);
-						textFieldRedisPort.setEnabled(true);
-						textFieldRedisPassword.setEnabled(true);
+						textFieldTargetHost.setEnabled(true);
+						textFieldTargetPort.setEnabled(true);
+						textFieldTargetPassword.setEnabled(true);
 						textFieldTargetDbName.setEnabled(false);
 						textFieldTargetUser.setEnabled(false);
+						
+						textFieldTargetHost.setText("localhost");
+						textFieldTargetPort.setText("6379");
+						textFieldTargetPassword.setText("");
+						textFieldTargetDbName.setText("");
+						textFieldTargetUser.setText("");
+					} else if (comboBoxTargets.getSelectedItem() instanceof CassadraConnector) {
+						textFieldTargetHost.setEnabled(true);
+						textFieldTargetPort.setEnabled(true);
+						textFieldTargetPassword.setEnabled(true);
+						textFieldTargetDbName.setEnabled(true);
+						textFieldTargetUser.setEnabled(true);
+						
+						textFieldTargetHost.setText("localhost");
+						textFieldTargetPort.setText("9000");
+						textFieldTargetPassword.setText("");
+						textFieldTargetDbName.setText("");
+						textFieldTargetUser.setText("system");
 					}
 				} else {
-					textFieldRedisHost.setEnabled(false);
-					textFieldRedisPort.setEnabled(false);
-					textFieldRedisPassword.setEnabled(false);
+					textFieldTargetHost.setEnabled(false);
+					textFieldTargetPort.setEnabled(false);
+					textFieldTargetPassword.setEnabled(false);
 					textFieldTargetDbName.setEnabled(false);
 					textFieldTargetUser.setEnabled(false);
 				}
