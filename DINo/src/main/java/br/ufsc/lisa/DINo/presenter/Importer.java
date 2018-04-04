@@ -51,6 +51,8 @@ public class Importer{
 		
 		ArrayList<Thread> threads = new ArrayList<>();
 		
+		nRDB.dropObject(app.exportedTableName());
+		
 		for (int i=0; i< cores; i++) {
 			final String query = sql+" limit "+(registrosCore) + " offset "+registrosCore*i;
 			threads.add(new Thread(()->{

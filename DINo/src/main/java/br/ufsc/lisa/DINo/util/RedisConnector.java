@@ -137,4 +137,10 @@ public class RedisConnector implements Connector {
 		return this.connect(uri, port, password);
 	}
 
+	@Override
+	public void dropObject(String name) {
+		// TODO Auto-generated method stub
+	}
+
+	
 }

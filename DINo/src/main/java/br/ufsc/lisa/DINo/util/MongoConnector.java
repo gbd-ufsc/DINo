@@ -100,5 +100,10 @@ public class MongoConnector implements Connector{
 
 		return true;
 	}
+	@Override
+	public void dropObject(String name) {
+		this.db.getCollection(name).drop();
+		
+	}
 
 }

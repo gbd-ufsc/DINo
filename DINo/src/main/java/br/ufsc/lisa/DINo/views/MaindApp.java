@@ -14,6 +14,7 @@ import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -109,6 +110,30 @@ public class MaindApp {
 	
 	public String exportedTableName() {
 		return (String) this.listTable.getSelectedValue();
+	}
+	
+	private String exportedDbName() {
+		return (String) this.listDb.getSelectedValue();
+	}
+	
+	public List<String> exportedPks() {
+		List<String> result = new LinkedList<String>();
+		
+		for(int i = 0; i< this.listPk.getModel().getSize();i++){
+            result.add((String)this.listPk.getModel().getElementAt(i));
+        }
+		
+		return result;
+	}
+	
+	public List<String> exportedValues() {
+		List<String> result = new LinkedList<String>();
+		
+		for(int i = 0; i< this.listValue.getModel().getSize();i++){
+            result.add((String)this.listValue.getModel().getElementAt(i));
+        }
+		
+		return result;
 	}
 	
 	public void importBloqued(boolean value) {
@@ -319,7 +344,7 @@ public class MaindApp {
 					btnGetSelectedColumnsPK.setEnabled(true);
 					listValue.setEnabled(true);
 					btnGetSelectedColumnsVALUE.setEnabled(true);
-					btnGenerateSql.setEnabled(true);
+					btnGenerateSql.setEnabled(false);
 
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
@@ -526,6 +551,7 @@ public class MaindApp {
 						textFieldTargetUser.getText(), textFieldTargetPassword.getText(),
 						textFieldTargetDbName.getText())) {
 					btnImport.setEnabled(true);
+					btnGenerateSql.setEnabled(true);
 					textFieldImport.setEnabled(true);
 					writeLog("[info] Conexão estável com " + targetDb.toString());
 				} else {
@@ -557,7 +583,7 @@ public class MaindApp {
 						textFieldTargetHost.setText("127.0.0.1");
 						textFieldTargetPort.setText("27017");
 						textFieldTargetPassword.setText("");
-						textFieldTargetDbName.setText("test");
+						textFieldTargetDbName.setText(exportedDbName());
 						textFieldTargetUser.setText("");
 						
 					} else if (comboBoxTargets.getSelectedItem() instanceof RedisConnector) {
@@ -580,10 +606,10 @@ public class MaindApp {
 						textFieldTargetUser.setEnabled(true);
 						
 						textFieldTargetHost.setText("localhost");
-						textFieldTargetPort.setText("9000");
+						textFieldTargetPort.setText("9042");
 						textFieldTargetPassword.setText("");
-						textFieldTargetDbName.setText("");
-						textFieldTargetUser.setText("system");
+						textFieldTargetDbName.setText(exportedDbName());
+						textFieldTargetUser.setText("");
 					}
 				} else {
 					textFieldTargetHost.setEnabled(false);
@@ -641,6 +667,23 @@ public class MaindApp {
 			public void actionPerformed(ActionEvent e) {
 				String tempPk = "";
 				String tempPkVirgula = "";
+				
+				if (comboBoxTargets.getSelectedItem() instanceof CassadraConnector) {
+					
+					for (int x = 0; x < listPk.getModel().getSize(); x++) {
+						tempPkVirgula += listPk.getModel().getElementAt(x)+", ";
+					}
+					for (int x = 0; x < listValue.getModel().getSize()-1; x++) {
+						tempPkVirgula += listValue.getModel().getElementAt(x)+", ";
+					}
+					tempPkVirgula += listValue.getModel().getElementAt(listValue.getModel().getSize()-1);
+					
+					textFieldImport.setText("SELECT " + tempPkVirgula +" FROM "
+							+ listTable.getSelectedValue().toString());
+
+					
+				}else {
+				
 				for (int x = 0; x < listPk.getModel().getSize(); x++) {
 					if (x == 0) {
 						tempPk = tempPk + listPk.getModel().getElementAt(x) + "::text";
@@ -661,6 +704,7 @@ public class MaindApp {
 				textFieldImport.setText("SELECT '" + textFieldPrefixo.getText() + "_'||" + tempPk
 						+ ", (SELECT row_to_json(_) FROM (SELECT " + tempValue + ") AS _ ) AS VALUE FROM "
 						+ listTable.getSelectedValue().toString());
+				}
 				writeLog("[info] Gerado comando SQL para importação de dados");
 			}
 		});
