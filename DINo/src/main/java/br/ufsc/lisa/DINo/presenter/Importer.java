@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import br.ufsc.lisa.DINo.util.Connector;
 import br.ufsc.lisa.DINo.util.PostgresDB;
-import br.ufsc.lisa.DINo.util.RedisConnector;
 import br.ufsc.lisa.DINo.util.RelationalDB;
 import br.ufsc.lisa.DINo.util.TimeFormatter;
 import br.ufsc.lisa.DINo.views.MaindApp;
@@ -18,8 +17,8 @@ public class Importer{
 	private Connector nRDB; 
 	private MaindApp app;
 	public int progress;
-	private long timeB, timeE;
-	private ArrayList<Thread> threads = new ArrayList<>();
+	private long timeB;
+	//private ArrayList<Thread> threads = new ArrayList<>();
 	
 	
 	
@@ -52,6 +51,7 @@ public class Importer{
 		ArrayList<Thread> threads = new ArrayList<>();
 		
 		nRDB.dropObject(app.exportedTableName());
+		nRDB.createStructure(app.exportedTableName(), app);
 		
 		for (int i=0; i< cores; i++) {
 			final String query = sql+" limit "+(registrosCore) + " offset "+registrosCore*i;

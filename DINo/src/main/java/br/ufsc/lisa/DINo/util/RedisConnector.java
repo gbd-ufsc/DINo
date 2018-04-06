@@ -1,5 +1,6 @@
 package br.ufsc.lisa.DINo.util;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,8 +16,6 @@ public class RedisConnector implements Connector {
 	// private MongoClient client;
 	// private Jedis jedis;
 	public JedisPool pool;
-	private String db;
-	private Integer port;
 	public String password;
 
 	public boolean connect(String uri, String port, String password) {
@@ -35,14 +34,13 @@ public class RedisConnector implements Connector {
 			e.printStackTrace();
 			return false;
 		}
-		db = uri;
-		this.port = Integer.valueOf(port);
 		this.password = password;
 		// jedis = pool.getResource();
 		return true;
 
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public boolean put(String key, String value) {
 		Jedis jedis = pool.getResource();
@@ -60,36 +58,8 @@ public class RedisConnector implements Connector {
 		return false;
 	}
 
-	public boolean importData(RelationalDB source, String query) {
-		Statement pstmt;
-		try {
-			pstmt = ((PostgresDB) source).getConnection().createStatement();
-			ResultSet result = pstmt.executeQuery(query);
-			Jedis jedis = pool.getResource();
-			if (password!= null && !password.isEmpty())
-				jedis.auth(this.password);
-			int i = 0, l = 0;
-			Transaction t = jedis.multi();
-			while (result.next()) {
-				String key = result.getString("?column?");
-				String value = result.getString("value");
-				t.set(key, value);
-				if (++i % 256 == 0) {
-					System.out.println("Lote: " + ++l);
-					t.exec();
-					t = jedis.multi();
-				}
-			}
-			System.out.println("Lote: " + ++l);
-			t.exec();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-
-		return true;
-	}
 	
+	@SuppressWarnings("resource")
 	public boolean importData(RelationalDB source, String query, MaindApp app, long block) {
 		Statement pstmt;
 		double progress =  (double) 256/block;
@@ -139,7 +109,13 @@ public class RedisConnector implements Connector {
 
 	@Override
 	public void dropObject(String name) {
-		// TODO Auto-generated method stub
+		// not necessary be implemented
+	}
+
+	@Override
+	public void createStructure(String name, MaindApp app) {
+		// not necessary be implemented
+		
 	}
 
 	

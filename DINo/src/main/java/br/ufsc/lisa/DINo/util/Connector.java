@@ -8,4 +8,6 @@ public interface Connector {
 	public boolean put(String key, String json);
 	public void close();
 	public void dropObject(String name);
+	public void createStructure(String name, MaindApp app);
+	
 }

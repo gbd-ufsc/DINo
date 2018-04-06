@@ -53,21 +53,20 @@ public class MaindApp {
 	private JTextField textFieldImport;
 	private PostgresDB postgresDb;
 	private Connector targetDb;
-	private JList listDb;
-	private String tempUrl;
+	private JList<String> listDb;
 	private JTextField textFieldPrefixo;
 	private JTextPane textFieldConsole;
 	private JTextField textFieldTargetHost;
 	private JTextField textFieldTargetPort;
 	private JTextField textFieldTargetPassword;
 	private JPanel panelDatabase;
-	private JList listColumns;
+	private JList<String> listColumns;
 	private JTabbedPane tabbedPaneTarget;
 	private JButton btnGenerateSql;
 	private JButton btnGetSelectedColumnsPK;
-	private JList listValue;
-	private JList listPk;
-	private JList listTable;
+	private JList<String> listValue;
+	private JList<String> listPk;
+	private JList<String> listTable;
 	private JButton btnGetSelectedColumnsVALUE;
 	private JButton btnImport;
 	private JComboBox<Connector> comboBoxTargets;
@@ -173,7 +172,7 @@ public class MaindApp {
 		frame.setLocationRelativeTo(null);
 
 		panelDatabase = new JPanel();
-		listColumns = new JList();
+		listColumns = new JList<String>();
 		tabbedPaneTarget = new JTabbedPane(JTabbedPane.TOP);
 
 		JPanel mainPanel = new JPanel();
@@ -287,7 +286,7 @@ public class MaindApp {
 		// scrollBar.setBounds(204, 38, 17, 146);
 		// panelDatabase.add(scrollBar);
 
-		listDb = new JList();
+		listDb = new JList<String>();
 		scrollPane.setViewportView(listDb);
 		listDb.addMouseListener(new MouseAdapter() {
 			@Override
@@ -328,7 +327,7 @@ public class MaindApp {
 		scrollPane_1.setBounds(24, 29, 252, 241);
 		panelTables.add(scrollPane_1);
 
-		listTable = new JList();
+		listTable = new JList<String>();
 		listTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -426,7 +425,7 @@ public class MaindApp {
 		scrollPane_3.setBounds(58, 36, 199, 90);
 		panelCollection.add(scrollPane_3);
 
-		listPk = new JList();
+		listPk = new JList<String>();
 		listPk.setEnabled(false);
 		scrollPane_3.setViewportView(listPk);
 		listPk.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -439,7 +438,7 @@ public class MaindApp {
 		scrollPane_4.setBounds(58, 166, 199, 82);
 		panelCollection.add(scrollPane_4);
 
-		listValue = new JList();
+		listValue = new JList<String>();
 		listValue.setEnabled(false);
 		scrollPane_4.setViewportView(listValue);
 		listValue.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -453,7 +452,7 @@ public class MaindApp {
 		btnGetSelectedColumnsPK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				DefaultListModel listPkTemp = new DefaultListModel();
+				DefaultListModel<String> listPkTemp = new DefaultListModel<String>();
 				List<String> selecionadosPk = listColumns.getSelectedValuesList();
 				for (String n : selecionadosPk) {
 					listPkTemp.addElement(n);
@@ -470,7 +469,7 @@ public class MaindApp {
 		btnGetSelectedColumnsVALUE.setEnabled(false);
 		btnGetSelectedColumnsVALUE.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DefaultListModel listValueTemp = new DefaultListModel();
+				DefaultListModel<String> listValueTemp = new DefaultListModel<String>();
 				List<String> selecionadosValues = listColumns.getSelectedValuesList();
 				for (String n : selecionadosValues) {
 					listValueTemp.addElement(n);
@@ -563,7 +562,7 @@ public class MaindApp {
 		buttonRedisConnect.setBounds(12, 251, 243, 25);
 		panelTargetNoSQL.add(buttonRedisConnect);
 
-		comboBoxTargets = new JComboBox();
+		comboBoxTargets = new JComboBox<>();
 		comboBoxTargets.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				textFieldTargetHost.setText("");

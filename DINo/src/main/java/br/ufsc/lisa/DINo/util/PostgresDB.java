@@ -13,7 +13,6 @@ public class PostgresDB implements RelationalDB {
 	private String driver = "org.postgresql.Driver";
 	private Connection con = null;
 	private String url;
-	private RedisConnector redisDb;
 	
 	public Connection getConnection() {
 		return this.con;
@@ -53,7 +52,7 @@ public class PostgresDB implements RelationalDB {
 
 	public List<String> listDatabases() throws ClassNotFoundException, SQLException  {
 
-		List<String> listDatabase = new LinkedList();
+		List<String> listDatabase = new LinkedList<>();
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT datname from pg_database where datistemplate = false");

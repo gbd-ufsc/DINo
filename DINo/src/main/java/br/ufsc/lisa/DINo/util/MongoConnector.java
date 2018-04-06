@@ -16,8 +16,6 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 
 import br.ufsc.lisa.DINo.views.MaindApp;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Transaction;
 
 public class MongoConnector implements Connector{
 	
@@ -103,6 +101,11 @@ public class MongoConnector implements Connector{
 	@Override
 	public void dropObject(String name) {
 		this.db.getCollection(name).drop();
+		
+	}
+	@Override
+	public void createStructure(String name, MaindApp app) {
+		// unnecessary
 		
 	}
 
