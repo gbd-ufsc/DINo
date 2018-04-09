@@ -14,6 +14,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.InsertManyOptions;
 
 import br.ufsc.lisa.DINo.views.MaindApp;
 
@@ -73,24 +74,23 @@ public class MongoConnector implements Connector{
 			int i = 0, l = 0;
 			//Transaction t = jedis.multi();
 			List<Document> bath = new ArrayList<Document>();
-			
+			InsertManyOptions options = new InsertManyOptions().ordered(false);
 			while (result.next()) {
 				String key = result.getString("?column?");
 				Document value = Document.parse(result.getString("value"));
 				
-				value.put("_id", key);
+				value.put("_id", key+"_"+i+"."+l);
 				
 				bath.add(value);
 				
 				if (++i % 256 == 0) {
 					System.out.println("Lote: " + ++l);
 					app.updateProgressBar(progress);
-					this.db.getCollection(collection).insertMany(bath);
+					this.db.getCollection(collection).insertMany(bath, options);
 					bath = new ArrayList<>();
 				}
 			}
 			System.out.println("Lote: " + ++l);
-			this.db.getCollection(collection).insertMany(bath);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
