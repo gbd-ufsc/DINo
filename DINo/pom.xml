@@ -27,6 +27,18 @@
 			<version>9.4-1200-jdbc41</version>
 		</dependency>
 		<dependency>
+		    <groupId>mysql</groupId>
+		    <artifactId>mysql-connector-java</artifactId>
+		    <version>8.0.16</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.oracle.jdbc</groupId>
+   			<artifactId>ojdbc14</artifactId>
+    		<version>10.2.0.1.0</version>
+    		<scope>system</scope>
+		    <systemPath>${project.basedir}/lib/ojdbc14-10.2.0.1.0.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.5.0</version>

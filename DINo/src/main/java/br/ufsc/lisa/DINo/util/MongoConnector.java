@@ -90,6 +90,11 @@ public class MongoConnector implements Connector{
 					bath = new ArrayList<>();
 				}
 			}
+			if (bath.size()>0) {
+				app.updateProgressBar(progress);
+				this.db.getCollection(collection).insertMany(bath, options);
+			}
+				
 			System.out.println("Lote: " + ++l);
 		} catch (SQLException e) {
 			e.printStackTrace();
